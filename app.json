@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Obsidian",
-    "slug": "obsidian-expo",
+    "slug": "obsidian",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -35,6 +35,12 @@
           "backgroundColor": "#09090B"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f4ee796f-e697-42ff-a756-abab948d1c23"
+      }
+    },
+    "owner": "muhamadaziz17s-team"
   }
 }
