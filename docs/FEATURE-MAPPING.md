@@ -134,15 +134,16 @@ stack trace, device, dan versi app. Untuk keperluan demo ada tombol debug
 "Force crash" (hanya muncul di build dev) yang menimulasi crash nyata.
 
 **Alur teknis:**
-1. Akun Sentry (free tier) dibuat; DSN dikonfigurasi via `expo-sentry` plugin
-   di app.json (DSN tidak hardcode — secret).
-2. SDK otomatis memasang global error handler → setiap uncaught exception
-   terkirim ke Sentry cloud.
+1. Akun Sentry (free tier) dibuat; DSN dikonfigurasi via env
+   `EXPO_PUBLIC_SENTRY_DSN` (tidak hardcode — secret, .env gitignored).
+2. `Sentry.init()` di `App.tsx` saat DSN tersedia; error juga lewat
+   `GlobalErrorHandler` (utils/errors.ts) → reporter Sentry.
 3. Tombol debug memanggil `throw new Error("Test crash for demo")`.
 4. Crash terkirim otomatis oleh SDK → muncul di dashboard dalam ±menit.
 
-**Lokasi kode:** `app.json` (plugin expo-sentry), tombol di
-`src/screens/MainScreen.tsx` (blok `__DEV__`).
+**Lokasi kode:** `app.json` (plugin @sentry/react-native), `App.tsx`
+(Sentry.init + reporter), tombol di `src/components/ForceCrashButton.tsx`
+(blok `__DEV__`).
 
 **Cara demo:** tekan "Force crash" (app crash) → buka sentry.io dashboard →
 issue "Test crash for demo" muncul dengan stack trace.
@@ -169,8 +170,8 @@ memakai intent standar Android.)
    terbuka (opsi Gmail/WhatsApp/semua app yang handle text).
 3. (Alternatif jalur email langsung) `Linking.openURL("mailto:...?subject=...")`.
 
-**Lokasi kode:** `src/utils/playlistExporter.ts`, tombol share di
-`src/screens/MainScreen.tsx` (header action).
+**Lokasi kode:** `src/utils/playlistExporter.ts`,
+`src/components/SharePlaylistButton.tsx` (dipakai di MainScreen).
 
 **Cara demo:** tekan "Share playlist" → pilih Gmail → draft email terisi daftar
 lagu. (Opsional: kirim ke email sendiri dan tunjukkan emailnya diterima.)

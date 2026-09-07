@@ -7,29 +7,35 @@ Status progres eksekusi. Agent WAJIB update file ini setiap selesai task
 - ✅ 0.1 Repo + docs tersalin ke repo proyek (2026-09-07)
 - ✅ 0.2 Scaffold Expo project (blank-typescript, Expo SDK 57) — terverifikasi
   tsc OK, expo-doctor 21/21, dev server start OK (2026-09-08)
-- ⬜ 0.3 Dependencies terpasang (expo-audio, expo-notifications, expo-sentry,
-  netinfo, jest-expo)
-- ⬜ 0.4 .gitignore + aturan secret (.env, DSN Sentry)
+- ✅ 0.3 Dependencies terpasang (expo-audio, expo-notifications,
+  @sentry/react-native, netinfo, jest-expo, expo-splash-screen) (2026-09-08)
+- ✅ 0.4 .gitignore + aturan secret (.env, DSN Sentry) + coverage/ (2026-09-08)
 
 ## Sprint 1 — JSON + Lazy loading
-- ⬜ 1.1 Model + test parsing (TDD, Jest)
-- ⬜ 1.2 API client + Repository
-- ⬜ 1.3 ViewModel + list UI + infinite scroll (FlatList)
+- ✅ 1.1 Model + test parsing (TDD, Jest) — test di src/__tests__/ (2026-09-08)
+- ✅ 1.2 API client + Repository — + timeout AbortController, 8 test (2026-09-08)
+- ✅ 1.3 ViewModel + list UI + infinite scroll (FlatList) — +5 test
+  MainViewModel; TDD menangkap bug guard double-fetch (2026-09-08)
 
 ## Sprint 2 — Connectivity + Audio
-- ⬜ 2.1 connectivity.ts (netinfo) + banner (TDD)
-- ⬜ 2.2 PlayerScreen (expo-audio)
+- ✅ 2.1 connectivity.ts (netinfo) + banner (TDD, 5 test) (2026-09-08)
+- ✅ 2.2 PlayerScreen (expo-audio) + Alert preview null; verifikasi audio di
+  device + screenshot menyusul (2026-09-08)
 
 ## Sprint 3 — Crash logs + Push (Expo)
-- ⬜ 3.1 Sentry setup + test crash terverifikasi
-- ⬜ 3.2 Push notification (expo-notifications) + test via push tool
+- ✅ 3.1 Sentry setup (@sentry/react-native plugin + DSN env) + ForceCrashButton;
+  verifikasi dashboard + screenshot menyusul (2026-09-08)
+- ✅ 3.2 Push notification (expo-notifications) + PushTestButton (lokal);
+  remote push via Expo tool + screenshot menyusul (2026-09-08)
 
 ## Sprint 4 — Uploading & emailing
-- ⬜ 4.1 PlaylistExporter + share via share sheet
+- ✅ 4.1 PlaylistExporter + SharePlaylistButton (share sheet); screenshot
+  menyusul (2026-09-08)
 
 ## Sprint 5 — Polish
-- ⬜ 5.1 Dark theme + icon/splash
-- ⬜ 5.2 Bukti demo lengkap (FEATURE-MAPPING)
+- ✅ 5.1 Dark theme + splash screen + icon (expo-splash-screen) (2026-09-08)
+- 🔶 5.2 Bukti demo: implementasi 7/7 selesai; screenshot/video di
+  docs/screenshots/ menunggu sesi demo di HP fisik (2026-09-08)
 - ⬜ 5.3 Build APK via EAS Build + alur demo dosen
 
 ## Keputusan terkunci (jangan diubah agent)
