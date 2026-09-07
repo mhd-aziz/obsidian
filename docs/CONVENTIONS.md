@@ -7,49 +7,44 @@ yang dijelaskan di commit message.
 
 - Kode, nama variabel/fungsi/kelas, commit message: **Inggris**.
 - Komentar kode & docs folder ini: boleh Indonesia.
-- Kotlin idiomatik: data class untuk model, suspend fun untuk IO, StateFlow
-  untuk state UI, composable stateless untuk UI. Hindari Java-style
-  getter/setter.
+- TypeScript idiomatik: `type`/`interface` untuk model, async/await untuk IO,
+  custom hook untuk ViewModel, komponen presentational stateless untuk UI.
+  Hindari `any`; `strict` mode tsconfig tetap on.
 
 ## Penamaan
 
-- Package: `com.application.obsidian` (keputusan final 2026-09-08 — tidak di-rename).
-- Kelas: PascalCase sesuai struktur di ARCHITECTURE.md — jangan bikin file baru
-  di luar struktur tanpa alasan.
-- Composable: PascalCase (`MainScreen`, `TrackRow`, `OfflineBanner`); event
-  handler lambda: `onTrackClick`, `onSearch`; state holder: `XUiState`.
-- Resource: tanpa layout XML (Compose); id view tidak berlaku — pakai
-  `Modifier.testTag("...")` untuk pengujian bila perlu.
+- File model/viewmodel/util: camelCase (`Track.ts`, `MainViewModel.ts`).
+- Komponen & screen: PascalCase file & nama (`MainScreen.tsx`, `TrackRow.tsx`,
+  `OfflineBanner.tsx`).
+- Event handler props: `onTrackPress`, `onSearch`.
+- Hook ViewModel: `useMainViewModel`, `usePlayerViewModel` — sesuai struktur di
+  ARCHITECTURE.md, jangan bikin file baru di luar struktur tanpa alasan.
 
 ## TDD (wajib untuk logic tanpa UI)
 
 Urutan: tulis test dulu → jalankan & PASTIKAN GAGAL → implement minimal →
 jalankan & PASS → commit.
 ```bash
-./gradlew test          # expected: BUILD FAILED saat red, BUILD SUCCESSFUL saat green
+npm run test            # Jest + jest-expo; expected: RED dulu, lalu GREEN
 ```
-Yang wajib test: parsing JSON (SearchResponseTest), logika pagination
-(MainViewModelTest dengan coroutine test). Yang cukup manual-test: audio,
-banner connectivity, FCM, share intent (butuh environment Android).
+Yang wajib test: parsing/normalisasi JSON (Track.test.ts), logika pagination
+(MainViewModel.test.ts dengan fetch mock), playlistExporter. Yang cukup
+manual-test di Expo Go: audio, banner connectivity, push notification,
+share sheet (butuh device nyata).
 
 ## Git workflow
 
 - Satu task = satu commit. Commit message conventional:
   `feat:`, `fix:`, `chore:`, `docs:`, `test:`.
-- Push ke `main` setiap selesai task (repo private, solo dev).
-- JANGAN commit: `google-services.json`, `local.properties`, `build/`,
-  `.idea/` (lihat .gitignore).
+- Push ke `main` setiap selesai task (repo solo dev).
+- JANGAN commit: `node_modules/`, `.expo/`, `dist/`, `.env`, keystore/EAS
+  credentials (lihat .gitignore).
 
 ## Verification commands (jalankan sebelum setiap push)
 
 ```bash
-./gradlew test          # semua test hijau
-./gradlew assembleDebug # BUILD SUCCESSFUL
+npx tsc --noEmit        # type check
+npm run test            # semua test hijau (mulai Sprint 1)
+npx expo-doctor         # 21/21 checks passed
+npx expo start          # app load di Expo Go (manual, per task UI)
 ```
-
-## Dependency policy
-
-- Tambah dependency baru HANYA jika tidak bisa diselesaikan dengan yang sudah
-  ada di ARCHITECTURE.md §1. Kalau perlu, jelaskan alasannya di commit.
-- Versi dependency mengikuti yang tertulis di ARCHITECTURE.md, kecuali ada
-  konflik compile.

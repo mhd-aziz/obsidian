@@ -1,15 +1,16 @@
 # PRD — Obsidian (Music Discovery App)
 
-> Dikembangkan dengan **Android Studio** (Jetpack Compose + preview/emulator),
-> arsitektur **MVVM**, API data **gratis tanpa key** (iTunes Search API).
-> Detail teknis di ARCHITECTURE.md.
+> Dikembangkan dengan **Expo (React Native + TypeScript)** — dev via Expo Go
+> di HP fisik, arsitektur **MVVM**, API data **gratis tanpa key** (iTunes
+> Search API). Detail teknis di ARCHITECTURE.md.
 
 ## 1. Ringkasan
 
-Obsidian adalah aplikasi Android untuk menemukan dan mendengarkan preview musik.
-User mencari lagu, melihat katalog (cover, artis, album), memutar preview 30
-detik, dan membagikan playlist favoritnya. Dibangun dengan Kotlin native untuk
-tugas mata kuliah Pemrograman Mobile Lanjut.
+Obsidian adalah aplikasi mobile Android untuk menemukan dan mendengarkan
+preview musik. User mencari lagu, melihat katalog (cover, artis, album),
+memutar preview 30 detik, dan membagikan playlist favoritnya. Dibangun dengan
+Expo (React Native + TypeScript) untuk tugas mata kuliah Pemrograman Mobile
+Lanjut (dosen mensyaratkan aplikasi mobile — bahasa/framework bebas).
 
 ## 2. Target user
 
@@ -36,17 +37,17 @@ tugas mata kuliah Pemrograman Mobile Lanjut.
 ### In scope
 - Pencarian lagu via iTunes Search API.
 - List lagu dengan pagination (infinite scroll).
-- Player preview audio 30 detik (Media3 ExoPlayer).
+- Player preview audio 30 detik (expo-audio).
 - Banner deteksi konektivitas real-time.
-- Notifikasi push via Firebase Cloud Messaging.
-- Crash reporting via Firebase Crashlytics.
-- Share/export playlist via Android share intent (email).
+- Notifikasi push via expo-notifications (Expo Push Service).
+- Crash reporting via Sentry (expo-sentry).
+- Share/export playlist via Android share sheet (email).
 - Dark theme "obsidian" (hitam mengkilap).
 
 ### Out of scope (YAGNI — tidak dikerjakan)
 - Full-track streaming / akun premium.
 - Login / autentikasi user.
-- Backend sendiri (semua data dari API publik + Firebase).
+- Backend sendiri (semua data dari API publik + layanan cloud Expo/Sentry).
 - iOS / web version.
 
 ## 5. Success criteria
@@ -55,4 +56,4 @@ tugas mata kuliah Pemrograman Mobile Lanjut.
    plan ini 7/7 (lihat FEATURE-MAPPING.md).
 2. App tidak crash pada alur normal: search → scroll → play → share.
 3. Semua fitur punya bukti demo (screenshot/video) di `docs/screenshots/`.
-4. Kode lolos `./gradlew test` dan `./gradlew assembleDebug`.
+4. Kode lolos `npx tsc --noEmit`, `npm run test` (Jest), dan `npx expo-doctor`.

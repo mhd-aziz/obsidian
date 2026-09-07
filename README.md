@@ -1,68 +1,35 @@
-# 🎵 Obsidian
+# Obsidian — Music Discovery App
 
-<div align="center">
+Aplikasi mobile Android untuk pencarian musik dari iTunes Search API (gratis,
+tanpa API key) dengan preview audio 30 detik.
 
-**Music Discovery App — jelajahi & dengarkan preview lagu dari seluruh dunia**
+- 🎧 **Preview audio** — putar cuplikan 30 detik dengan expo-audio
+- 🔍 **Pencarian real-time** — hasil langsung dari iTunes Search API
+- ♾️ **Lazy loading** — daftar dimuat bertahap saat scroll (FlatList)
+- 📡 **Connectivity** — banner otomatis saat koneksi hilang (netinfo)
+- 🔔 **Push notification** — notifikasi dari cloud via expo-notifications
+- 🛡️ **Crash reporting** — laporan crash otomatis ke Sentry (expo-sentry)
+- 📤 **Share playlist** — bagikan daftar lagu via share sheet / email
 
-Kotlin • Android Studio • MVVM
+Dibangun untuk tugas mata kuliah Pemrograman Mobile Lanjut — target 7/7 fitur
+penilaian.
 
-</div>
+## Tech stack
 
----
-
-## Tentang
-
-Obsidian adalah aplikasi Android untuk mencari dan menemukan musik. Ketik nama
-lagu atau artis → jelajahi hasilnya → dengarkan preview 30 detik langsung dari
-aplikasi. Data musik disediakan oleh [iTunes Search API](https://performance-partners.apple.com/search-api)
-(gratis, tanpa API key).
-
-## ✨ Fitur
-
-- 🔍 **Pencarian musik** — cari jutaan lagu lewat iTunes Search API
-- 🎧 **Preview audio** — putar cuplikan 30 detik dengan Media3 ExoPlayer
-  (play/pause, seekbar)
-- ♾️ **Infinite scroll** — hasil dimuat otomatis saat digulir, tanpa tombol next
-- 📶 **Deteksi koneksi** — banner real-time saat offline, kembali normal saat
-  online
-- 🔔 **Push notification** — notifikasi dari cloud via Firebase Cloud Messaging
-- 🛡️ **Crash reporting** — laporan crash otomatis ke Firebase Crashlytics
-- 📤 **Share playlist** — bagikan daftar lagu ke Gmail/WhatsApp dalam satu ketuk
-- ❤️ **Favorit** — simpan lagu yang disukai (penyimpanan lokal)
-
-## 🏗️ Tech Stack & Arsitektur
-
-| Komponen | Teknologi |
+| Komponen | Pilihan |
 |---|---|
-| Bahasa | Kotlin |
-| UI | Jetpack Compose + Material3 (Android Studio) |
-| Arsitektur | MVVM (View → ViewModel → Repository) |
-| Networking | Retrofit 2 + Moshi |
-| Audio | Media3 ExoPlayer |
-| Image loading | Coil |
-| Push & Crash | Firebase Cloud Messaging + Crashlytics |
-| Min SDK | 26 (Android 8.0) |
+| Framework | Expo SDK 57 (React Native 0.86, React 19.2) |
+| Bahasa | TypeScript |
+| Arsitektur | MVVM (Model → ViewModel hook → View) |
+| Networking | fetch (iTunes Search API) |
+| Audio | expo-audio |
+| Push & Crash | expo-notifications + Sentry |
+| Build APK | EAS Build (cloud) |
 
-## 📸 Screenshot
+## Menjalankan project
 
-> Akan ditambahkan setelah implementasi UI.
+1. `npm install`
+2. `npx expo start`
+3. Scan QR dari app **Expo Go** di HP (atau tekan `a` untuk emulator).
 
-| Pencarian & Daftar Lagu | Player Preview |
-|:---:|:---:|
-| _screenshot 1_ | _screenshot 2_ |
-
-## 🔧 Build
-
-1. Clone repo ini
-2. Buka di **Android Studio** (Jellyfish / lebih baru)
-3. Sync Gradle → Run ▶ di emulator atau device fisik
-
-```bash
-git clone https://github.com/mhd-aziz/obsidian.git
-```
-
-Tidak perlu API key — sumber data musik gratis dan terbuka.
-
-## 📄 License
-
-Dibuat sebagai proyek Pemrograman Mobile Lanjut © 2026 [mhd-aziz](https://github.com/mhd-aziz)
+Detail planning lengkap ada di `docs/` (mulai dari `docs/PRD.md`).

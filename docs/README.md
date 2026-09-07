@@ -1,8 +1,8 @@
-# Obsidian — Music Discovery App (Android, Kotlin)
+# Obsidian — Music Discovery App (Android, Expo/React Native)
 
-Dokumen planning untuk pengembangan aplikasi Android **Obsidian** dengan bantuan
-AI coding agent (vibe coding). Folder ini adalah sumber kebenaran (source of truth)
-sebelum repo proyek dibuat.
+Dokumen planning untuk pengembangan aplikasi mobile Android **Obsidian** dengan
+bantuan AI coding agent (vibe coding). Folder ini adalah sumber kebenaran
+(source of truth) sebelum repo proyek dibuat.
 
 ## Struktur dokumen
 

@@ -1,15 +1,26 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+# Expo / Node
+node_modules/
+.expo/
+dist/
+web-build/
+.expo-shared/
+
+# Secrets
+.env
+.env.*
+*.keystore
+*.jks
+eas.json.bak
+
+# OS / editor
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-google-services.json
+*.iml
+.idea/
+
+# Native (tidak dipakai — premanaged workflow; jangan commit hasil prebuild)
+/android/
+/ios/
+
+# Logs
+npm-debug.*
+yarn-error.*

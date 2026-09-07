@@ -36,35 +36,34 @@ Contoh (sudah diverifikasi hidup):
 }
 ```
 
-Field yang WAJIB di-parse (model `Track.kt`):
+Field yang WAJIB di-parse (model `src/models/Track.ts`):
 
-| Field JSON | Tipe Kotlin | Pakai untuk |
+| Field JSON | Tipe TypeScript | Pakai untuk |
 |---|---|---|
-| trackId | Long | key unik (LazyColumn item key) |
-| trackName | String | judul |
-| artistName | String | subtitle |
-| collectionName | String? | info album (nullable) |
-| previewUrl | String? | ExoPlayer (fitur audio) |
-| artworkUrl100 | String? | Coil cover (boleh upscale ke 200x200 dengan replace suffix) |
+| trackId | number | key unik (FlatList keyExtractor) |
+| trackName | string | judul |
+| artistName | string | subtitle |
+| collectionName | string \| null | info album (nullable) |
+| previewUrl | string \| null | expo-audio (fitur audio) |
+| artworkUrl100 | string \| null | Image cover (boleh upscale ke 200x200 dengan replace suffix) |
 
 ### Catatan penting untuk agent
 
-1. Field JSON snake_case → gunakan `@Json(name = "trackName")` Moshi atau
-   `KotlinJsonAdapterFactory` + nama properti sama persis.
-2. `previewUrl` kadang berupa `http://` (bukan https). Jika ExoPlayer gagal
-   karena cleartext, fallback: tampilkan toast "Preview tidak tersedia" —
-   JANGAN enable cleartext global untuk semua domain.
+1. Field JSON snake_case → deklarasikan interface TypeScript dengan nama
+   properti sama persis (tidak perlu mapping/rename).
+2. `previewUrl` kadang berupa `http://` (bukan https). Jika player gagal,
+   fallback: tampilkan Alert "Preview tidak tersedia".
 3. Fallback data alternatif: Deezer public API
    `https://api.deezer.com/search?q=<term>&limit=25` (field `preview` mp3,
    `title`, `artist.name`, `album.cover_medium`). Implementasikan fallback
    HANYA jika iTunes bermasalah saat development (YAGNI).
 4. iTunes API tidak punya autentikasi; batasi diri ±20 req/menit.
 
-## Firebase (Fitur push + crash)
+## Layanan cloud (Fitur push + crash)
 
-- Dibutuhkan: project Firebase baru (gratis) dengan package `com.application.obsidian`.
-- File `google-services.json` diletakkan di `app/` — di-gitignore, JANGAN commit.
-- FCM: kirim test message dari console (Cloud Messaging) untuk demo; tidak
-  butuh backend sendiri.
-- Crashlytics: verifikasi dengan tombol debug "Force crash" → report muncul
-  di console ≤5 menit.
+- Push: **Expo Push Service** (gratis) — `expo-notifications`, kirim test via
+  Expo push tool (https://exp.host/--/api/v2/push/send) dengan Expo push token
+  dari app; tidak butuh backend sendiri, tidak perlu setup Firebase console.
+- Crash: **Sentry** (free tier) via `expo-sentry` — DSN disimpan sebagai
+  secret (eas secret / tidak di-commit). Verifikasi dengan tombol debug
+  "Force crash" → issue muncul di dashboard sentry.io.

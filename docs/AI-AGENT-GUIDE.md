@@ -4,107 +4,109 @@ Instruksi eksekusi untuk AI agent. Eksekusi berurutan. Satu task = satu commit.
 Setiap task punya Acceptance Criteria (AC) — task belum selesai jika AC belum
 terpenuhi. Progres dicatat di ROADMAP.md.
 
+Environment FINAL: **Expo (React Native + TypeScript)**. Acuan resmi:
+https://docs.expo.dev/. Verifikasi tiap task: `npx tsc --noEmit`,
+`npm run test` (Jest, mulai Sprint 1), dan `npx expo-doctor`.
+
 ## Sprint 0 — Fondasi
 
 ### Task 0.1 — Repo + docs
-- Inisialisasi repo git di folder proyek, hubungkan ke GitHub `mhd-aziz/obsidian`.
-- Salin folder `docs/` dari planning folder ke root repo.
-- AC: `git remote -v` menunjuk ke repo; push pertama sukses.
+- [SELESAI] Repo terhubung ke GitHub `mhd-aziz/obsidian`, docs ter-push.
 
-### Task 0.2 — Scaffold Android project
-- Android Studio: New Project → Empty Activity (Compose) → name=Obsidian,
-  package=`com.application.obsidian`, language=Kotlin, minSdk 26, build config
-  Kotlin DSL. (CATATAN: package aktual scaffold = `com.application.obsidian`;
-  keputusan final user 2026-09-08 — package TIDAK di-rename.)
-- AC: `./gradlew assembleDebug` → BUILD SUCCESSFUL. Commit: `chore: scaffold android project`.
+### Task 0.2 — Scaffold
+- [SELESAI 2026-09-08] `create-expo-app --template blank-typescript` (Expo SDK
+  57, RN 0.86, React 19.2). Terverifikasi: `tsc --noEmit` OK,
+  `expo-doctor` 21/21, dev server start OK.
+- AC: `npx expo start` jalan + Expo Go di HP bisa connect. Commit:
+  `chore: scaffold expo project`.
 
-### Task 0.3 — Dependencies
-- Tambahkan dependencies persis seperti ARCHITECTURE.md §1 (Retrofit 2.11,
-  Moshi 1.15 + KotlinJsonAdapterFactory, Media3 1.11.0 + media3-ui-compose,
-  Coil 3.6.1 coil-compose + coil-network-okhttp, lifecycle
-  viewmodel-compose + collectAsStateWithLifecycle) + permission INTERNET di
-  manifest. Compose BOM sudah ada dari scaffold.
-- AC: `./gradlew assembleDebug` hijau. Commit: `chore: add network audio deps`.
+### Task 0.3 — Dependencies + config app.json
+- `npx expo install expo-audio expo-notifications expo-sentry
+  @react-native-community/netinfo jest-expo jest @types/jest`
+- app.json: name Obsidian, dark splash/icon, plugin sentry+notifications.
+- AC: `npx expo-doctor` tetap hijau. Commit: `chore: add feature deps`.
 
-### Task 0.4 — Setup .gitignore + Firebase placeholder
-- .gitignore: `google-services.json`, `local.properties`, `build/`, `.idea/`.
-- Firebase setup baru dilakukan di Sprint 3 (jangan di-sprint ini).
+### Task 0.4 — Git hygiene
+- [SELESAI] .gitignore: node_modules, .expo, dist, .env (bawaan template +
+  tambahan .env).
 
 ## Sprint 1 — JSON + Lazy loading
 
 ### Task 1.1 — Model + test parsing (TDD)
-- Tulis `SearchResponseTest.kt` DULU dengan JSON sample dari docs/API.md,
-  jalankan `./gradlew test` → HARUS GAGAL.
-- Implement `data/model/Track.kt`, `data/model/SearchResponse.kt` (Moshi,
-  perhatikan snake_case & nullable fields sesuai API.md).
-- AC: `./gradlew test` → PASS. Commit: `test+feat: itunes model parsing`.
+- Tulis `src/models/Track.test.ts` DULU: sample JSON iTunes (docs/API.md) →
+  parse/normalisasi → HARUS GAGAL (belum ada implementasi).
+- Implement `src/models/Track.ts` + `SearchResponse.ts` (TypeScript types +
+  fungsi normalisasi field nullable: artworkUrl100→512, previewUrl?, etc).
+- AC: `npm run test` PASS. Commit: `test+feat: itunes model parsing`.
 
-### Task 1.2 — API service + Repository
-- `data/api/ItunesApiService.kt` (suspend fun, query params sesuai API.md),
-  `data/repo/TrackRepository.kt` (base URL https://itunes.apple.com/).
-- AC: `./gradlew assembleDebug` hijau; hanya repository yang memanggil API.
-  Commit: `feat: itunes api service + repository`.
+### Task 1.2 — API client + Repository
+- `src/api/itunesClient.ts` (fetch, params sesuai API.md),
+  `src/repositories/TrackRepository.ts` (search(term, offset), error handling
+  network/HTTP, timeout).
+- Unit test repository dengan fetch di-mock.
+- AC: test PASS; curl manual ke API masih 200. Commit:
+  `feat: itunes repository`.
 
 ### Task 1.3 — ViewModel + list UI + lazy loading
-- `ui/MainViewModel.kt`: StateFlow<List<Track>>, `search(term)`, `loadMore()`
-  (offset += 25, append, guard sedang-loading).
-- `ui/MainActivity.kt` + `ui/MainScreen.kt` (SearchBar + LazyColumn +
-  OfflineBanner placeholder) + `ui/components/TrackRow.kt` (Coil AsyncImage
-  load artwork, key = trackId di LazyColumn).
-- Lazy loading: trigger di akhir LazyColumn (derivedStateOf pada
-  `layoutInfo.visibleItemsInfo` / item footer) → `loadMore()`.
-- AC: app jalan, search "indonesia" menampilkan hasil, scroll memuat halaman
-  berikutnya (logcat offset=25). Screenshot → `docs/screenshots/list.png`.
-  Commit: `feat: searchable track list with infinite scroll`.
+- `src/viewmodels/MainViewModel.ts`: state tracks/isLoading/isOffline/error,
+  `search(term)`, `loadMore()` (offset += 25, append, guard sedang-loading).
+- `src/screens/MainScreen.tsx` (TextInput search + FlatList +
+  OfflineBanner placeholder) + `src/components/TrackRow.tsx` (Image artwork,
+  keyExtractor = trackId).
+- Lazy loading: `FlatList` prop `onEndReached` (threshold ~0.5) → `loadMore()`.
+- AC: app jalan di Expo Go, search "indonesia" menampilkan hasil, scroll
+  memuat halaman berikutnya (log `Loaded page 2, offset=25`). Screenshot →
+  `docs/screenshots/list.png`. Commit:
+  `feat: searchable track list with infinite scroll`.
 
 ## Sprint 2 — Connectivity + Audio
 
-### Task 2.1 — ConnectivityObserver (TDD)
-- Test dulu (mock ConnectivityManager) → gagal → implement
-  `util/ConnectivityObserver.kt` dengan registerDefaultNetworkCallback →
-  expose StateFlow<Boolean>.
-- Tampilkan banner offline di MainScreen (observasi flow).
-- AC: airplane mode toggle → banner muncul/hilang. Screenshot
-  `docs/screenshots/offline-banner.png`. Commit: `feat: live connectivity banner`.
+### Task 2.1 — Connectivity observer (TDD)
+- Test dulu (mock netinfo) → gagal → implement `src/utils/connectivity.ts`
+  (subscribe → boolean state) + integrasi ke MainViewModel + OfflineBanner.
+- AC: airplane mode toggle di HP → banner muncul/hilang. Screenshot
+  `docs/screenshots/offline-banner.png`. Commit:
+  `feat: live connectivity banner`.
 
-### Task 2.2 — PlayerActivity (ExoPlayer)
-- Klik item → PlayerActivity; PlayerScreen (PlayerSurface media3-ui-compose)
-  + play/pause; media item = track.previewUrl; release() via
-  DisposableEffect/onStop().
-- Handle previewUrl null / http-cleartext gagal: toast "Preview tidak
-  tersedia" (lihat API.md catatan 2).
-- AC: preview terdengar, tidak ada leak (rotate screen tidak crash).
-  Screenshot `docs/screenshots/player.png`. Commit: `feat: preview audio player`.
+### Task 2.2 — PlayerScreen (expo-audio)
+- Tap item → layar player (cover besar, judul, artis, play/pause, progress);
+  `expo-audio` `createAudioPlayer` + `setAudioModeAsync`.
+- release/unload player saat unmount (wajib).
+- Handle previewUrl null/gagal → Alert "Preview tidak tersedia"
+  (lihat API.md catatan 2).
+- AC: preview terdengar di HP, pause/play bekerja, back → audio berhenti.
+  Screenshot/video `docs/screenshots/player.png|.mp4`. Commit:
+  `feat: preview audio player`.
 
-## Sprint 3 — Firebase (crash logs + push)
+## Sprint 3 — Crash logs + Push (Expo: Sentry + notifications)
 
-### Task 3.1 — Firebase project setup
-- Buat project Firebase (nama obsidian-x), daftarkan package
-  `com.application.obsidian`, taruh `google-services.json` di `app/` (JANGAN
-  commit), tambah plugin google-services + crashlytics.
-- AC: app terdaftar di console. Commit: `chore: firebase init`.
+### Task 3.1 — Sentry setup
+- Akun Sentry free tier → `npx expo install expo-sentry` + DSN di app.json/
+  eas.json secret.
+- Tombol debug "Force crash" (build dev) → verifikasi muncul di dashboard.
+- AC: crash terlihat di Sentry console. Screenshot
+  `docs/screenshots/sentry.png`. Commit: `feat: remote crash reporting`.
 
-### Task 3.2 — Crashlytics terverifikasi
-- Tombol debug "Force crash" (throw RuntimeException) — hanya di BuildConfig.DEBUG.
-- AC: report muncul di console ≤5 menit. Screenshot
-  `docs/screenshots/crashlytics.png`. Commit: `feat: crashlytics verified`.
+### Task 3.2 — Push notifications
+- `src/services/notifications.ts`: register push token (Expo push service),
+  handler notifikasi; kirim test via Expo push tool (exp.host/~notify).
+- AC: notifikasi tampil di device → tap → app terbuka. Screenshot
+  `docs/screenshots/push.png`. Commit: `feat: push notifications`.
 
-### Task 3.3 — FCM
-- `service/ObsidianFirebaseMessagingService.kt` → notifikasi dari
-  onMessageReceived.
-- AC: test message dari console → notifikasi tampil. Screenshot
-  `docs/screenshots/push.png`. Commit: `feat: fcm push notifications`.
-
-## Sprint 4 — Uploading & emailing
+## Sprint 4 — Emailing
 
 ### Task 4.1 — PlaylistExporter
-- Tombol "Share playlist" → kumpulkan hasil search/favorit → teks →
-  Intent.ACTION_SEND (EXTRA_TEXT, type text/plain, chooser).
-- AC: Gmail terbuka dengan draft berisi daftar lagu. Screenshot
+- Tombol "Share playlist" → kumpulkan hasil search → teks
+  ("Obsidian Playlist\n1. Artist — Title\n...") → `Share.share({message})`
+  (share sheet Android; opsi Gmail/email di dalamnya).
+- Fungsi buildPlaylistText murni → unit test.
+- AC: share sheet terbuka dengan draft berisi daftar lagu. Screenshot
   `docs/screenshots/share-email.png`. Commit: `feat: share playlist via email`.
 
 ## Sprint 5 — Polish
 
-### Task 5.1 — Dark theme "obsidian" (Material3 ColorScheme di Theme.kt) + app icon.
+### Task 5.1 — Dark theme "obsidian" (StyleSheet + palet hitam mengkilap di
+theme.ts) + app icon/splash.
 ### Task 5.2 — Lengkapi FEATURE-MAPPING.md kolom Bukti + ROADMAP.
-### Task 5.3 — `./gradlew assembleDebug` final + siapkan alur demo dosen.
+### Task 5.3 — Build APK via EAS Build (`eas build -p android --profile
+preview`) + siapkan alur demo dosen.
