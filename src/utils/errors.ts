@@ -32,8 +32,8 @@ export class AppError extends Error {
   }
 }
 
-/** Pesan user per kode error. */
-const USER_MESSAGES: Record<AppErrorCode, string> = {
+/** Pesan user per kode error. Diekspor agar layer API memakai pesan yang sama. */
+export const USER_MESSAGES: Record<AppErrorCode, string> = {
   NETWORK_OFFLINE: 'Tidak ada koneksi internet. Periksa jaringan kamu.',
   NETWORK_TIMEOUT: 'Koneksi lambat. Coba lagi sebentar.',
   HTTP_ERROR: 'Server sedang bermasalah. Coba lagi nanti.',

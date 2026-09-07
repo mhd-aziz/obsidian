@@ -6,8 +6,8 @@ web-build/
 .expo-shared/
 
 # Secrets
-.env
-.env.*
+.env.prod
+.env.dev
 *.keystore
 *.jks
 eas.json.bak
@@ -26,4 +26,4 @@ npm-debug.*
 yarn-error.*
 
 # Test coverage
-coverage/
+/coverage/

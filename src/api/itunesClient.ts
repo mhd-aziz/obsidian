@@ -4,7 +4,7 @@
  */
 import { ITUNES_BASE_URL, SEARCH_ENDPOINT } from '../utils/constants';
 import { SearchResponse } from '../models/SearchResponse';
-import { AppError, withErrorHandling } from '../utils/errors';
+import { AppError, withErrorHandling, USER_MESSAGES } from '../utils/errors';
 
 export interface SearchParams {
   term: string;
@@ -48,7 +48,11 @@ export async function itunesSearch({
       const response = await fetch(url, { signal: controller.signal });
 
       if (!response.ok) {
-        throw new AppError('HTTP_ERROR', `iTunes API error: HTTP ${response.status}`);
+        throw new AppError(
+          'HTTP_ERROR',
+          USER_MESSAGES.HTTP_ERROR,
+          `iTunes API error: HTTP ${response.status}`
+        );
       }
 
       return parseSearchResponse(await response.json());

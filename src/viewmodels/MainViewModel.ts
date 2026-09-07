@@ -24,6 +24,9 @@ export function useMainViewModel() {
   const [error, setError] = useState<string | null>(null);
   const offsetRef = useRef(0);
   const queryRef = useRef('');
+  // Guard anti double-fetch: isLoading tidak cukup karena loadMore tidak
+  // men-set-nya; pakai ref in-flight (tidak trigger re-render).
+  const loadMoreInFlightRef = useRef(false);
 
   const search = useCallback(async (term: string) => {
     setQuery(term);
@@ -45,7 +48,8 @@ export function useMainViewModel() {
   /** Lazy loading: append halaman berikutnya saat scroll mendekati akhir. */
   const loadMore = useCallback(async () => {
     const term = queryRef.current;
-    if (!term || isLoading) return;
+    if (!term || isLoading || loadMoreInFlightRef.current) return;
+    loadMoreInFlightRef.current = true;
     const offset = offsetRef.current + 25;
     try {
       const results = await withErrorHandling(
@@ -56,6 +60,8 @@ export function useMainViewModel() {
       setTracks((prev) => [...prev, ...results]);
     } catch {
       // append gagal: state lama dipertahankan, user bisa scroll lagi untuk retry
+    } finally {
+      loadMoreInFlightRef.current = false;
     }
   }, [isLoading]);
 
