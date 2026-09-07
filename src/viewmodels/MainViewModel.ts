@@ -36,7 +36,10 @@ export function useMainViewModel() {
     setError(null);
     try {
       const results = await withErrorHandling(() => searchTracks(term, 0), 'MainViewModel.search');
-      setTracks(results);
+      // Dedupe: satu response bisa berisi trackId yang sama (remaster/versi beda
+      // platform), masing-masing menghasilkan FlatList key duplikat.
+      const seen = new Set<number>();
+      setTracks(results.filter((t) => (seen.has(t.trackId) ? false : seen.add(t.trackId))));
     } catch (e) {
       setError(e instanceof AppError ? e.userMessage : 'Terjadi kesalahan. Coba lagi.');
       setTracks([]);
@@ -57,7 +60,13 @@ export function useMainViewModel() {
         'MainViewModel.loadMore'
       );
       offsetRef.current = offset;
-      setTracks((prev) => [...prev, ...results]);
+      // Dedupe by trackId: iTunes results can overlap across pages (same track
+      // at a page boundary), which would produce duplicate FlatList keys.
+      setTracks((prev) => {
+        const seen = new Set(prev.map((t) => t.trackId));
+        const fresh = results.filter((t) => !seen.has(t.trackId));
+        return [...prev, ...fresh];
+      });
     } catch {
       // append gagal: state lama dipertahankan, user bisa scroll lagi untuk retry
     } finally {

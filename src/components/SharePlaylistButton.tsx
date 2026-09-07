@@ -22,9 +22,9 @@ export function SharePlaylistButton({ tracks }: { tracks: Track[] }) {
     <Pressable
       testID="share-playlist"
       onPress={onShare}
-      className="self-center rounded-full bg-obsidian-accent px-4 py-2 active:opacity-70"
+      className="rounded-full bg-obsidian-accent px-5 py-2 active:opacity-70"
     >
-      <Text className="text-xs font-semibold text-white">Share playlist</Text>
+      <Text className="text-[11px] font-semibold text-white">Share playlist ({tracks.length})</Text>
     </Pressable>
   );
 }

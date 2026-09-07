@@ -6,29 +6,39 @@ interface TrackRowProps {
   onPress: (track: Track) => void;
 }
 
-/** Item list lagu — presentational stateless (aturan MVVM #6). */
+/**
+ * Item list lagu — presentational stateless (aturan MVVM #6).
+ * Touch target >= 48px (ux guideline: min 44px), divider tipis antar baris.
+ */
 export function TrackRow({ track, onPress }: TrackRowProps) {
   const artwork = getArtworkUrl200(track);
   return (
     <Pressable
       onPress={() => onPress(track)}
-      className="flex-row items-center gap-3 px-4 py-3 active:opacity-60"
+      className="flex-row items-center gap-3 border-b border-zinc-800/60 px-4 active:bg-zinc-900/60"
+      style={{ minHeight: 72, paddingVertical: 12 }}
     >
       {artwork ? (
-        <Image source={{ uri: artwork }} className="h-14 w-14 rounded-lg" />
+        <Image
+          source={{ uri: artwork }}
+          className="h-14 w-14 rounded-xl bg-zinc-800"
+          resizeMode="cover"
+        />
       ) : (
-        <View className="h-14 w-14 items-center justify-center rounded-lg bg-zinc-800">
-          <Text className="text-zinc-500">♪</Text>
+        <View className="h-14 w-14 items-center justify-center rounded-xl bg-zinc-800">
+          <Text className="text-xl text-zinc-500">♪</Text>
         </View>
       )}
-      <View className="flex-1">
+      <View className="flex-1 gap-0.5">
         <Text numberOfLines={1} className="text-base font-semibold text-zinc-100">
           {track.trackName}
         </Text>
         <Text numberOfLines={1} className="text-sm text-zinc-400">
           {track.artistName}
+          {track.collectionName ? ` — ${track.collectionName}` : ''}
         </Text>
       </View>
+      <Text className="text-lg text-zinc-600">›</Text>
     </Pressable>
   );
 }

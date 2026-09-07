@@ -5,6 +5,8 @@
 import './global.css';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { LogBox } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { APP_ENV } from './src/utils/constants';
 import { GlobalErrorHandler } from './src/utils/errors';
 import { GlobalErrorBoundary } from './src/components/GlobalErrorBoundary';
@@ -15,6 +17,12 @@ import {
   registerForPushNotificationsAsync,
   addNotificationResponseListener,
 } from './src/services/notifications';
+
+// expo-notifications me-log warning "not fully supported in Expo Go" saat module
+// di-import — sudah kita tangani via guard isRunningInExpoGo() + postinstall
+// patch (scripts/patch-expo-notifications.js). Warning ini informatif, bukan
+// bug; sembunyikan dari LogBox agar tidak menutupi UI (docs: reactnative.dev).
+LogBox.ignoreLogs([/expo-notifications/]);
 
 // Wire reporter global → Sentry (crash reporting, fitur #6).
 // DSN dikosongkan di dev → Sentry.init di-skip, error tetap masuk GlobalErrorHandler.
@@ -38,13 +46,15 @@ export default function App() {
   }, []);
 
   return (
-    <GlobalErrorBoundary>
-      {selectedTrack ? (
-        <PlayerScreen track={selectedTrack} onClose={() => setSelectedTrack(null)} />
-      ) : (
-        <MainScreen onOpenPlayer={setSelectedTrack} />
-      )}
-      <StatusBar style="light" />
-    </GlobalErrorBoundary>
+    <SafeAreaProvider>
+      <GlobalErrorBoundary>
+        {selectedTrack ? (
+          <PlayerScreen track={selectedTrack} onClose={() => setSelectedTrack(null)} />
+        ) : (
+          <MainScreen onOpenPlayer={setSelectedTrack} />
+        )}
+        <StatusBar style="light" />
+      </GlobalErrorBoundary>
+    </SafeAreaProvider>
   );
 }
