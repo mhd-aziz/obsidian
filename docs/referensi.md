@@ -24,7 +24,7 @@ Sumber inspirasi nama: kumpulan nama music app di Reddit r/apps
 |---|---|---|---|
 | 1 | JSON | Retrofit + Moshi, data lagu dari iTunes/Deezer API | bawah |
 | 2 | Connectivity | ConnectivityManager + NetworkCallback, banner offline | bawah |
-| 3 | Lazy loading | Paging 3 / RecyclerView pagination | bawah |
+| 3 | Lazy loading | LazyColumn pagination (Compose) | bawah |
 | 4 | Android audio | Media3 ExoPlayer play preview 30 detik | bawah |
 | 5 | Push messaging | FCM notifikasi (lagu trending / now playing) | bawah |
 | 6 | Remote crash logs | Firebase Crashlytics | bawah |
@@ -55,14 +55,17 @@ Sumber inspirasi nama: kumpulan nama music app di Reddit r/apps
 ### 3. Lazy loading
 - Official Paging 3 overview:
   https://developer.android.com/topic/libraries/architecture/paging/v3-overview
-- Contoh project Paging 3 + RecyclerView (GitHub):
-  https://github.com/rafsanahmad/RecyclerView-Paging-3.0
+- Official Compose — Lazily load data with lists and Paging:
+  https://developer.android.com/develop/ui/compose/quick-guides/content/lazily-load-list
 
 ### 4. Android audio
 - Official Media3 ExoPlayer (create player, MediaSession, background playback):
   https://developer.android.com/media/implement/playback-app
+- Official Media3 Compose UI (PlayerSurface, media3-ui-compose):
+  https://developer.android.com/media/media3/ui/compose
 - Repo: https://github.com/androidx/media
-- Deps: `androidx.media3:media3-exoplayer`, `media3-ui`, `media3-common` (1.11.0)
+- Deps: `androidx.media3:media3-exoplayer`, `media3-ui`, `media3-common`,
+  `media3-ui-compose` (1.11.0)
 
 ### 5. Push messaging
 - Official FCM: https://firebase.google.com/docs/cloud-messaging

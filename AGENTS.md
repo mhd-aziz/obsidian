@@ -7,10 +7,11 @@ Cursor, dsb). Baca file ini PERTAMA sebelum menulis kode.
 
 Aplikasi Android Kotlin native "Obsidian": pencarian musik dari iTunes Search
 API (gratis, tanpa API key) dengan preview audio 30 detik. Dikembangkan di
-**Android Studio** dengan arsitektur **MVVM** dan layout XML (canvas). Dibangun
-untuk tugas mata kuliah Pemrograman Mobile Lanjut yang menilai minimal 3 dari 7
-fitur (JSON, Connectivity, Lazy loading, Remote crash logs, Uploading and
-emailing, Push messaging, Android audio) — plan ini menargetkan 7/7.
+**Android Studio** dengan arsitektur **MVVM** dan UI **Jetpack Compose**
+(keputusan final user — bukan XML). Dibangun untuk tugas mata kuliah
+Pemrograman Mobile Lanjut yang menilai minimal 3 dari 7 fitur (JSON,
+Connectivity, Lazy loading, Remote crash logs, Uploading and emailing, Push
+messaging, Android audio) — plan ini menargetkan 7/7.
 
 ## Sebelum mulai kerja — WAJIB baca (urutan)
 
@@ -35,7 +36,7 @@ emailing, Push messaging, Android audio) — plan ini menargetkan 7/7.
    (`./gradlew test`). Verifikasi sebelum push: `./gradlew test` dan
    `./gradlew assembleDebug` keduanya hijau.
 7. Jangan menambah dependency di luar daftar ARCHITECTURE.md §1 tanpa alasan.
-8. Jangan mengganti keputusan final (Kotlin, XML+RecyclerView, MVVM, iTunes API)
+8. Jangan mengganti keputusan final (Kotlin, Compose, MVVM, iTunes API)
    tanpa persetujuan user — keputusan ini sudah dikunci di diskusi planning.
 9. Kalau menemukan situasi yang tidak tercakup docs, BERHENTI dan tanya user,
    jangan mengarang keputusan arsitektur sendiri.

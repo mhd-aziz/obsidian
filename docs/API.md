@@ -40,7 +40,7 @@ Field yang WAJIB di-parse (model `Track.kt`):
 
 | Field JSON | Tipe Kotlin | Pakai untuk |
 |---|---|---|
-| trackId | Long | key unik (RecyclerView stable id) |
+| trackId | Long | key unik (LazyColumn item key) |
 | trackName | String | judul |
 | artistName | String | subtitle |
 | collectionName | String? | info album (nullable) |
@@ -62,7 +62,7 @@ Field yang WAJIB di-parse (model `Track.kt`):
 
 ## Firebase (Fitur push + crash)
 
-- Dibutuhkan: project Firebase baru (gratis) dengan package `com.mhdaziz.obsidian`.
+- Dibutuhkan: project Firebase baru (gratis) dengan package `com.application.obsidian`.
 - File `google-services.json` diletakkan di `app/` — di-gitignore, JANGAN commit.
 - FCM: kirim test message dari console (Cloud Messaging) untuk demo; tidak
   butuh backend sendiri.

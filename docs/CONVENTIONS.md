@@ -8,15 +8,18 @@ yang dijelaskan di commit message.
 - Kode, nama variabel/fungsi/kelas, commit message: **Inggris**.
 - Komentar kode & docs folder ini: boleh Indonesia.
 - Kotlin idiomatik: data class untuk model, suspend fun untuk IO, StateFlow
-  untuk state UI. Hindari Java-style getter/setter.
+  untuk state UI, composable stateless untuk UI. Hindari Java-style
+  getter/setter.
 
 ## Penamaan
 
-- Package: `com.mhdaziz.obsidian` (jangan diubah).
+- Package: `com.application.obsidian` (keputusan final 2026-09-08 — tidak di-rename).
 - Kelas: PascalCase sesuai struktur di ARCHITECTURE.md — jangan bikin file baru
   di luar struktur tanpa alasan.
-- Resource: `activity_main.xml`, `item_track.xml`, `activity_player.xml`;
-  id view: snake_case (`rv_tracks`, `search_bar`, `banner_offline`).
+- Composable: PascalCase (`MainScreen`, `TrackRow`, `OfflineBanner`); event
+  handler lambda: `onTrackClick`, `onSearch`; state holder: `XUiState`.
+- Resource: tanpa layout XML (Compose); id view tidak berlaku — pakai
+  `Modifier.testTag("...")` untuk pengujian bila perlu.
 
 ## TDD (wajib untuk logic tanpa UI)
 

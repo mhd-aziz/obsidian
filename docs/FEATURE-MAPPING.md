@@ -25,11 +25,10 @@ punya data apa pun.
 4. Response JSON di-parse Moshi menjadi objek Kotlin: `SearchResponse`
    (berisi `resultCount: Int`, `results: List<Track>`), `Track` (trackId,
    trackName, artistName, collectionName, previewUrl, artworkUrl100).
-5. List<Track> diterbitkan lewat StateFlow → RecyclerView menampilkan.
+4. List<Track> diterbitkan lewat StateFlow → LazyColumn menampilkan.
 
 **Lokasi kode:** `data/api/ItunesApiService.kt`, `data/model/Track.kt`,
 `data/model/SearchResponse.kt`, `data/repo/TrackRepository.kt`.
-
 **Cara demo ke dosen:** buka app → ketik "indonesia" → tap search → daftar lagu
 asli dari iTunes muncul. (Opsional: tunjukkan raw JSON dari browser/curl untuk
 memperlihatkan data yang sama.)
@@ -53,11 +52,11 @@ Saat koneksi kembali → banner hilang otomatis dan app bisa memuat lagi.
    `ConnectivityManager.registerDefaultNetworkCallback(NetworkCallback)`.
 2. `onAvailable()` → `StateFlow<Boolean> = true`; `onLost()` → false.
 3. `MainViewModel` menggabungkan status online ke UI state.
-4. `OfflineBanner` (View) mengobservasi state → tampil/hilang.
+4. `OfflineBanner` (composable) mengobservasi state → tampil/hilang.
 5. Guard: saat offline, `search()`/`loadMore()` tidak menembak API.
 
-**Lokasi kode:** `util/ConnectivityObserver.kt`, `ui/OfflineBanner.kt`,
-`ui/MainViewModel.kt`.
+**Lokasi kode:** `util/ConnectivityObserver.kt`, `ui/components/OfflineBanner.kt`,
+`ui/main/MainViewModel.kt`.
 
 **Cara demo:** buka app dengan hasil pencarian tampil → aktifkan airplane mode →
 banner muncul → matikan airplane mode → banner hilang.
@@ -78,14 +77,16 @@ yang menggantung. Daftar bisa terus digulir sampai hasil habis.
 
 **Alur teknis:**
 1. `MainViewModel` menyimpan `offset` (0, 25, 50, ...).
-2. `TrackAdapter` memasang `RecyclerView.OnScrollListener`: saat item terakhir
-   terlihat dan tidak sedang loading → `viewModel.loadMore()`.
+2. `LazyColumn` + listener scroll (atau derivedStateOf pada
+   `layoutInfo.visibleItemsInfo`): saat item terakhir terlihat dan tidak
+   sedang loading → `viewModel.loadMore()`.
 3. `loadMore()` memanggil repository dengan `offset` baru → hasil APPEND ke
-   StateFlow (bukan replace) → RecyclerView hanya menambah item (ListAdapter
-   diff util).
+   StateFlow (bukan replace) → LazyColumn hanya menambah item (rekomposisi
+   efisien via key = trackId).
 
-**Lokasi kode:** `ui/MainViewModel.kt` (`loadMore()`), `ui/TrackAdapter.kt`
-(scroll listener), `data/repo/TrackRepository.kt` (parameter offset).
+**Lokasi kode:** `ui/main/MainViewModel.kt` (`loadMore()`),
+`ui/main/MainScreen.kt` (LazyColumn + trigger scroll),
+`data/repo/TrackRepository.kt` (parameter offset).
 
 **Cara demo:** search "love" (hasilnya ribuan) → scroll pelan ke bawah →
 lihat item baru masuk terus. Tunjukkan logcat: `Loaded page 2, offset=25`.
@@ -106,12 +107,13 @@ audio berhenti dan resource dilepas.
 
 **Alur teknis:**
 1. Klik item → `PlayerActivity` menerima objek Track (Intent extra).
-2. `ExoPlayer.Builder(context).build()` dipasang ke `PlayerView`.
+2. `ExoPlayer.Builder(context).build()` dipasang ke PlayerSurface
+   (media3-ui-compose) di `PlayerScreen.kt`.
 3. `MediaItem.fromUri(track.previewUrl)` → `prepare()` → `play()`.
-4. `onStop()` → `player.release()` (wajib, anti memory-leak).
+4. `DisposableEffect`/`onStop()` → `player.release()` (wajib, anti memory-leak).
 5. previewUrl null / format tidak didukung → toast "Preview tidak tersedia".
 
-**Lokasi kode:** `ui/PlayerActivity.kt`, `res/layout/activity_player.xml`.
+**Lokasi kode:** `ui/player/PlayerActivity.kt`, `ui/player/PlayerScreen.kt`.
 
 **Cara demo:** tap lagu apa pun → audio bunyi → pause → play → back (audio
 berhenti).
@@ -130,7 +132,7 @@ stack trace, device, dan versi app. Untuk keperluan demo ada tombol debug
 "Force crash" (hanya muncul di build debug) yang menimulasi crash nyata.
 
 **Alur teknis:**
-1. Project Firebase dibuat, package `com.mhdaziz.obsidian` didaftarkan,
+1. Project Firebase dibuat, package `com.application.obsidian` didaftarkan,
    `google-services.json` diletakkan di `app/` (tidak di-commit).
 2. Plugin `com.google.gms.google-services` + `com.google.firebase.crashlytics`
    dan dependency `firebase-crashlytics-ktx` ditambahkan.
@@ -165,7 +167,8 @@ memakai intent standar Android.)
    `putExtra(EXTRA_EMAIL, ...)` opsional + `type = "text/plain"`.
 3. `Intent.createChooser(...)` → `startActivity`.
 
-**Lokasi kode:** `util/PlaylistExporter.kt`, tombol di `MainActivity` toolbar.
+**Lokasi kode:** `util/PlaylistExporter.kt`, tombol share di
+`ui/main/MainScreen.kt` (TopAppBar action).
 
 **Cara demo:** tekan "Share playlist" → pilih Gmail → draft email terisi daftar
 lagu. (Opsional: kirim ke email sendiri dan tunjukkan emailnya diterima.)
@@ -194,7 +197,7 @@ notifikasi membuka app.
    background; pesan "data" diproses di onMessageReceived.
 4. Demo: Firebase console → Cloud Messaging → "Create test message".
 
-**Lokasi kode:** `push/ObsidianFirebaseMessagingService.kt`,
+**Lokasi kode:** `service/ObsidianFirebaseMessagingService.kt`,
 `AndroidManifest.xml` (deklarasi service).
 
 **Cara demo:** kirim test campaign dari Firebase console → notifikasi muncul

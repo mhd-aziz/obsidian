@@ -35,7 +35,7 @@ aplikasi. Data musik disediakan oleh [iTunes Search API](https://performance-par
 | Komponen | Teknologi |
 |---|---|
 | Bahasa | Kotlin |
-| UI | XML Layout + RecyclerView (Android Studio) |
+| UI | Jetpack Compose + Material3 (Android Studio) |
 | Arsitektur | MVVM (View → ViewModel → Repository) |
 | Networking | Retrofit 2 + Moshi |
 | Audio | Media3 ExoPlayer |

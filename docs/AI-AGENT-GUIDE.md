@@ -12,15 +12,18 @@ terpenuhi. Progres dicatat di ROADMAP.md.
 - AC: `git remote -v` menunjuk ke repo; push pertama sukses.
 
 ### Task 0.2 — Scaffold Android project
-- Android Studio: New Project → Empty Views Activity → name=Obsidian,
-  package=`com.mhdaziz.obsidian`, language=Kotlin, minSdk 26, build config
-  Kotlin DSL.
+- Android Studio: New Project → Empty Activity (Compose) → name=Obsidian,
+  package=`com.application.obsidian`, language=Kotlin, minSdk 26, build config
+  Kotlin DSL. (CATATAN: package aktual scaffold = `com.application.obsidian`;
+  keputusan final user 2026-09-08 — package TIDAK di-rename.)
 - AC: `./gradlew assembleDebug` → BUILD SUCCESSFUL. Commit: `chore: scaffold android project`.
 
 ### Task 0.3 — Dependencies
 - Tambahkan dependencies persis seperti ARCHITECTURE.md §1 (Retrofit 2.11,
-  Moshi 1.15 + KotlinJsonAdapterFactory, Media3 1.5.x, Coil 2.7, lifecycle
-  viewmodel-ktx) + permission INTERNET di manifest.
+  Moshi 1.15 + KotlinJsonAdapterFactory, Media3 1.11.0 + media3-ui-compose,
+  Coil 3.6.1 coil-compose + coil-network-okhttp, lifecycle
+  viewmodel-compose + collectAsStateWithLifecycle) + permission INTERNET di
+  manifest. Compose BOM sudah ada dari scaffold.
 - AC: `./gradlew assembleDebug` hijau. Commit: `chore: add network audio deps`.
 
 ### Task 0.4 — Setup .gitignore + Firebase placeholder
@@ -45,11 +48,11 @@ terpenuhi. Progres dicatat di ROADMAP.md.
 ### Task 1.3 — ViewModel + list UI + lazy loading
 - `ui/MainViewModel.kt`: StateFlow<List<Track>>, `search(term)`, `loadMore()`
   (offset += 25, append, guard sedang-loading).
-- `ui/MainActivity.kt` + `activity_main.xml` (SearchView + RecyclerView +
-  OfflineBanner placeholder) + `TrackAdapter.kt` + `item_track.xml` (Coil
-  load artwork, id track sebagai stable id).
-- Lazy loading: RecyclerView.OnScrollListener → item terakhir terlihat →
-  `loadMore()`.
+- `ui/MainActivity.kt` + `ui/MainScreen.kt` (SearchBar + LazyColumn +
+  OfflineBanner placeholder) + `ui/components/TrackRow.kt` (Coil AsyncImage
+  load artwork, key = trackId di LazyColumn).
+- Lazy loading: trigger di akhir LazyColumn (derivedStateOf pada
+  `layoutInfo.visibleItemsInfo` / item footer) → `loadMore()`.
 - AC: app jalan, search "indonesia" menampilkan hasil, scroll memuat halaman
   berikutnya (logcat offset=25). Screenshot → `docs/screenshots/list.png`.
   Commit: `feat: searchable track list with infinite scroll`.
@@ -60,13 +63,14 @@ terpenuhi. Progres dicatat di ROADMAP.md.
 - Test dulu (mock ConnectivityManager) → gagal → implement
   `util/ConnectivityObserver.kt` dengan registerDefaultNetworkCallback →
   expose StateFlow<Boolean>.
-- Tampilkan banner offline di MainActivity (observasi flow).
+- Tampilkan banner offline di MainScreen (observasi flow).
 - AC: airplane mode toggle → banner muncul/hilang. Screenshot
   `docs/screenshots/offline-banner.png`. Commit: `feat: live connectivity banner`.
 
 ### Task 2.2 — PlayerActivity (ExoPlayer)
-- Klik item → PlayerActivity; PlayerView + play/pause; media item =
-  track.previewUrl; release() di onStop().
+- Klik item → PlayerActivity; PlayerScreen (PlayerSurface media3-ui-compose)
+  + play/pause; media item = track.previewUrl; release() via
+  DisposableEffect/onStop().
 - Handle previewUrl null / http-cleartext gagal: toast "Preview tidak
   tersedia" (lihat API.md catatan 2).
 - AC: preview terdengar, tidak ada leak (rotate screen tidak crash).
@@ -75,9 +79,9 @@ terpenuhi. Progres dicatat di ROADMAP.md.
 ## Sprint 3 — Firebase (crash logs + push)
 
 ### Task 3.1 — Firebase project setup
-- Buat project Firebase (nama obsidian-x), daftarkan package, taruh
-  `google-services.json` di `app/` (JANGAN commit), tambah plugin
-  google-services + crashlytics.
+- Buat project Firebase (nama obsidian-x), daftarkan package
+  `com.application.obsidian`, taruh `google-services.json` di `app/` (JANGAN
+  commit), tambah plugin google-services + crashlytics.
 - AC: app terdaftar di console. Commit: `chore: firebase init`.
 
 ### Task 3.2 — Crashlytics terverifikasi
@@ -86,7 +90,8 @@ terpenuhi. Progres dicatat di ROADMAP.md.
   `docs/screenshots/crashlytics.png`. Commit: `feat: crashlytics verified`.
 
 ### Task 3.3 — FCM
-- `push/ObsidianFirebaseMessagingService.kt` → notifikasi dari onMessageReceived.
+- `service/ObsidianFirebaseMessagingService.kt` → notifikasi dari
+  onMessageReceived.
 - AC: test message dari console → notifikasi tampil. Screenshot
   `docs/screenshots/push.png`. Commit: `feat: fcm push notifications`.
 
@@ -100,6 +105,6 @@ terpenuhi. Progres dicatat di ROADMAP.md.
 
 ## Sprint 5 — Polish
 
-### Task 5.1 — Dark theme "obsidian" + app icon.
+### Task 5.1 — Dark theme "obsidian" (Material3 ColorScheme di Theme.kt) + app icon.
 ### Task 5.2 — Lengkapi FEATURE-MAPPING.md kolom Bukti + ROADMAP.
 ### Task 5.3 — `./gradlew assembleDebug` final + siapkan alur demo dosen.

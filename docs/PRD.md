@@ -1,8 +1,8 @@
 # PRD — Obsidian (Music Discovery App)
 
-> Dikembangkan dengan **Android Studio** (canvas XML + emulator), arsitektur
-> **MVVM**, API data **gratis tanpa key** (iTunes Search API). Detail teknis di
-> ARCHITECTURE.md.
+> Dikembangkan dengan **Android Studio** (Jetpack Compose + preview/emulator),
+> arsitektur **MVVM**, API data **gratis tanpa key** (iTunes Search API).
+> Detail teknis di ARCHITECTURE.md.
 
 ## 1. Ringkasan
 
