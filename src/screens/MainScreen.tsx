@@ -8,6 +8,7 @@ import { OfflineBanner } from '../components/OfflineBanner';
 import { EmptyStateView } from '../components/EmptyStateView';
 import { ForceCrashButton } from '../components/ForceCrashButton';
 import { PushTestButton } from '../components/PushTestButton';
+import { SharePlaylistButton } from '../components/SharePlaylistButton';
 
 /**
  * MainScreen — pencarian + daftar lagu (View layer MVVM).
@@ -39,6 +40,7 @@ export function MainScreen({ onOpenPlayer }: { onOpenPlayer: (track: Track) => v
       <OfflineBanner visible={uiState.isOffline} />
       <ForceCrashButton />
       <PushTestButton />
+      <SharePlaylistButton tracks={uiState.tracks} />
 
       {uiState.isLoading && uiState.tracks.length === 0 ? (
         <View className="flex-1 items-center justify-center">
