@@ -24,3 +24,6 @@ eas.json.bak
 # Logs
 npm-debug.*
 yarn-error.*
+
+# Test coverage
+coverage/
