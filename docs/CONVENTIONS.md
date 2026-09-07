@@ -23,12 +23,14 @@ yang dijelaskan di commit message.
 ## TDD (wajib untuk logic tanpa UI)
 
 Urutan: tulis test dulu → jalankan & PASTIKAN GAGAL → implement minimal →
-jalankan & PASS → commit.
+jalankan & PASS → commit. Semua unit test ditaruh di `src/__tests__/`
+(bukan kolokasi).
 ```bash
 npm run test            # Jest + jest-expo; expected: RED dulu, lalu GREEN
 ```
-Yang wajib test: parsing/normalisasi JSON (Track.test.ts), logika pagination
-(MainViewModel.test.ts dengan fetch mock), playlistExporter. Yang cukup
+Yang wajib test: parsing/normalisasi JSON (`__tests__/Track.test.ts`),
+logika pagination (`__tests__/MainViewModel.test.ts` dengan fetch mock),
+playlistExporter. Yang cukup
 manual-test di Expo Go: audio, banner connectivity, push notification,
 share sheet (butuh device nyata).
 

@@ -44,8 +44,8 @@
   "jest": {
     "preset": "jest-expo",
     "testMatch": [
-      "**/*.test.ts",
-      "**/*.test.tsx"
+      "**/__tests__/**/*.test.ts",
+      "**/__tests__/**/*.test.tsx"
     ],
     "collectCoverage": true,
     "coveragePathIgnorePatterns": [

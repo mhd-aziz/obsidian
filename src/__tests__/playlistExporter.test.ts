@@ -1,4 +1,4 @@
-import { buildPlaylistText } from './playlistExporter';
+import { buildPlaylistText } from '../utils/playlistExporter';
 import { Track } from '../models/Track';
 
 const track = (id: number, name: string, artist: string): Track => ({

@@ -1,4 +1,4 @@
-import { AppError, GlobalErrorHandler, toAppError, withErrorHandling } from './errors';
+import { AppError, GlobalErrorHandler, toAppError, withErrorHandling } from '../utils/errors';
 
 describe('toAppError', () => {
   it('mempertahankan AppError apa adanya', () => {

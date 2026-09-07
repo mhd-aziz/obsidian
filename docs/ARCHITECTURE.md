@@ -73,6 +73,11 @@ obsidian/
     │   │                          #   search(), loadMore(), error
     │   └── PlayerViewModel.ts     # usePlayerViewModel(): isPlaying, position, play(), pause()
     │
+    ├── __tests__/              # unit test Jest (kolokasi terpusat)
+    │   ├── Track.test.ts           # parsing/normalisasi model
+    │   ├── errors.test.ts          # AppError + GlobalErrorHandler
+    │   └── playlistExporter.test.ts
+    │
     ├── screens/               # ══ LAYER VIEW (MVVM) ══
     │   ├── MainScreen.tsx         # SearchBar + FlatList + OfflineBanner
     │   └── PlayerScreen.tsx       # cover besar + play/pause + progress
@@ -103,7 +108,7 @@ obsidian/
 | Komponen reusable | `src/components/` | `TrackRow.tsx`, `OfflineBanner.tsx` |
 | Service OS (notif) | `src/services/` | `notifications.ts` |
 | Helper murni (testable Jest) | `src/utils/` | `playlistExporter.ts` |
-| Unit test | kolokasi `*.test.ts` di samping file, jest-expo | `src/models/Track.test.ts` |
+| Unit test | folder `src/__tests__/` (test Match via jest-expo) | `src/__tests__/Track.test.ts` |
 | Konstanta teks UI | langsung di komponen (RN); i18n tidak dibutuhkan (YAGNI) | — |
 
 ## 3. Data flow

@@ -1,4 +1,4 @@
-import { Track, getArtworkUrl200 } from './Track';
+import { Track, getArtworkUrl200 } from '../models/Track';
 
 const baseTrack: Track = {
   trackId: 1,
