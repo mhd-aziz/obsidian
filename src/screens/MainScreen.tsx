@@ -6,6 +6,7 @@ import { subscribeConnectivity } from '../utils/connectivity';
 import { TrackRow } from '../components/TrackRow';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { EmptyStateView } from '../components/EmptyStateView';
+import { ForceCrashButton } from '../components/ForceCrashButton';
 
 /**
  * MainScreen — pencarian + daftar lagu (View layer MVVM).
@@ -35,6 +36,7 @@ export function MainScreen({ onOpenPlayer }: { onOpenPlayer: (track: Track) => v
       </View>
 
       <OfflineBanner visible={uiState.isOffline} />
+      <ForceCrashButton />
 
       {uiState.isLoading && uiState.tracks.length === 0 ? (
         <View className="flex-1 items-center justify-center">
