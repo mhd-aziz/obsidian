@@ -4,13 +4,17 @@
  */
 import './global.css';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { APP_ENV } from './src/utils/constants';
 import { GlobalErrorHandler } from './src/utils/errors';
 import { GlobalErrorBoundary } from './src/components/GlobalErrorBoundary';
 import { MainScreen } from './src/screens/MainScreen';
 import { PlayerScreen } from './src/screens/PlayerScreen';
 import { Track } from './src/models/Track';
+import {
+  registerForPushNotificationsAsync,
+  addNotificationResponseListener,
+} from './src/services/notifications';
 
 // Wire reporter global → Sentry (crash reporting, fitur #6).
 // DSN dikosongkan di dev → Sentry.init di-skip, error tetap masuk GlobalErrorHandler.
@@ -26,6 +30,12 @@ if (sentryDsn) {
 
 export default function App() {
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+
+  // Push notification: register token + listener tap notifikasi (fitur #5).
+  useEffect(() => {
+    void registerForPushNotificationsAsync();
+    return addNotificationResponseListener();
+  }, []);
 
   return (
     <GlobalErrorBoundary>

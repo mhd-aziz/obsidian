@@ -50,3 +50,15 @@ export function addNotificationResponseListener(): () => void {
   });
   return () => subscription.remove();
 }
+
+/** Notifikasi lokal utk verifikasi tampil di device (Task 3.2, dev only). */
+export async function scheduleTestNotification(): Promise<void> {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'Obsidian',
+      body: 'Notifikasi push berfungsi 🎵',
+      sound: 'default',
+    },
+    trigger: { seconds: 2, type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL },
+  });
+}
