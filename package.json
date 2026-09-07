@@ -8,7 +8,7 @@
     "expo": "~57.0.20",
     "expo-asset": "~57.0.16",
     "expo-audio": "~57.0.4",
-    "expo-notifications": "~57.0.17",
+    "expo-notifications": "57.0.9",
     "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
     "nativewind": "^4.2.6",
@@ -40,7 +40,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "format": "prettier --write \"**/*.{ts,tsx,css,json}\"",
-    "lint:format": "prettier --check \"**/*.{ts,tsx,css,json}\""
+    "lint:format": "prettier --check \"**/*.{ts,tsx,css,json}\"",
+    "postinstall": "node scripts/patch-expo-notifications.js"
   },
   "jest": {
     "preset": "jest-expo",

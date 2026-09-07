@@ -5,7 +5,6 @@
  * Token push remote di-register via services/notifications.ts saat app start.
  */
 import { Pressable, Text } from 'react-native';
-import * as Notifications from 'expo-notifications';
 import { scheduleTestNotification } from '../services/notifications';
 
 export function PushTestButton() {
