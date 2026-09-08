@@ -1,5 +1,15 @@
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, useWindowDimensions, View } from 'react-native';
 import { getArtworkUrl200, Track } from '../models/Track';
+
+/**
+ * Skala elemen baris mengikuti lebar layar (responsif semua HP):
+ * 320dp (kecil) → 0.85x, 400dp (umum) → 1.0x, 480dp+ (tablet/HP besar) → 1.2x.
+ * Ukuran font & touch target tetap >= 44px pada layar terkecil.
+ */
+function useRowScale(): number {
+  const { width } = useWindowDimensions();
+  return Math.min(1.2, Math.max(0.85, width / 400));
+}
 
 interface TrackRowProps {
   track: Track;
@@ -9,34 +19,53 @@ interface TrackRowProps {
 
 /**
  * Item list lagu — presentational stateless (aturan MVVM #6).
- * Touch target >= 48px (ux guideline: min 44px), divider tipis antar baris.
  * Tap baris → buka player; tombol ⤴ → share lagu ini saja (bukan seluruh hasil).
+ * Jarak antara tombol ⤴ dan chevron › sengaja diberi margin ekstra agar tidak
+ * berdempetan (dua aksi berbeda: share vs buka player).
  */
 export function TrackRow({ track, onPress, onShare }: TrackRowProps) {
+  const scale = useRowScale();
   const artwork = getArtworkUrl200(track);
+  const artSize = Math.round(56 * scale);
+  const actionSize = Math.round(36 * scale);
+  const shareGap = Math.round(16 * scale); // jarak share ⤴ → chevron ›
   return (
     <Pressable
       onPress={() => onPress(track)}
       className="flex-row items-center gap-3 border-b border-zinc-800/60 px-4 active:bg-zinc-900/60"
-      style={{ minHeight: 72, paddingVertical: 12 }}
+      style={{ minHeight: Math.round(72 * scale), paddingVertical: 12 }}
     >
       {artwork ? (
         <Image
           source={{ uri: artwork }}
-          className="h-14 w-14 rounded-xl bg-zinc-800"
+          style={{ height: artSize, width: artSize, borderRadius: 12 }}
+          className="bg-zinc-800"
           resizeMode="cover"
         />
       ) : (
-        <View className="h-14 w-14 items-center justify-center rounded-xl bg-zinc-800">
-          <Text className="text-xl text-zinc-500">♪</Text>
+        <View
+          style={{ height: artSize, width: artSize, borderRadius: 12 }}
+          className="items-center justify-center bg-zinc-800"
+        >
+          <Text style={{ fontSize: Math.round(20 * scale) }} className="text-zinc-500">
+            ♪
+          </Text>
         </View>
       )}
       <View className="flex-1 gap-0.5">
-        <Text numberOfLines={1} className="text-base font-semibold text-zinc-100">
+        <Text
+          numberOfLines={1}
+          style={{ fontSize: Math.round(16 * scale) }}
+          className="font-semibold text-zinc-100"
+        >
           {track.trackName}
         </Text>
         <View className="flex-row items-center gap-2">
-          <Text numberOfLines={1} className="flex-1 text-sm text-zinc-400">
+          <Text
+            numberOfLines={1}
+            style={{ fontSize: Math.round(13 * scale) }}
+            className="flex-1 text-zinc-400"
+          >
             {track.artistName}
             {track.collectionName ? ` — ${track.collectionName}` : ''}
           </Text>
@@ -51,11 +80,20 @@ export function TrackRow({ track, onPress, onShare }: TrackRowProps) {
         testID={`share-track-${track.trackId}`}
         onPress={() => onShare(track)}
         hitSlop={8}
-        className="h-9 w-9 items-center justify-center rounded-full bg-zinc-900 active:opacity-60"
+        style={{
+          height: actionSize,
+          width: actionSize,
+          marginRight: shareGap,
+        }}
+        className="items-center justify-center rounded-full bg-zinc-900 active:opacity-60"
       >
-        <Text className="text-sm text-zinc-300">⤴</Text>
+        <Text style={{ fontSize: Math.round(14 * scale) }} className="text-zinc-300">
+          ⤴
+        </Text>
       </Pressable>
-      <Text className="text-lg text-zinc-600">›</Text>
+      <Text style={{ fontSize: Math.round(18 * scale) }} className="text-zinc-600">
+        ›
+      </Text>
     </Pressable>
   );
 }
