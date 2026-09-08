@@ -5,7 +5,7 @@
 import './global.css';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { LogBox, View } from 'react-native';
+import { LogBox, View, BackHandler } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { APP_ENV } from './src/utils/constants';
 import { GlobalErrorHandler } from './src/utils/errors';
@@ -46,6 +46,24 @@ export default function App() {
     void registerForPushNotificationsAsync();
     return addNotificationResponseListener();
   }, []);
+
+  // Tombol back hardware Android: tutup overlay (Player/Diagnostics) dulu,
+  // JANGAN keluar app. Di MainScreen (root) → default behavior (keluar).
+  useEffect(() => {
+    const onBack = (): boolean => {
+      if (selectedTrack) {
+        setSelectedTrack(null);
+        return true; // event terserap — activity tidak di-close
+      }
+      if (showDiagnostics) {
+        setShowDiagnostics(false);
+        return true;
+      }
+      return false; // MainScreen: serahkan ke Android (keluar app)
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBack);
+    return () => sub.remove();
+  }, [selectedTrack, showDiagnostics]);
 
   return (
     <SafeAreaProvider>
