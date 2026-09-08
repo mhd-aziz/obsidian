@@ -122,6 +122,11 @@ audio berhenti dan resource dilepas.
 `src/screens/PlayerScreen.tsx`, `src/api/audiusClient.ts`,
 `src/models/AudiusTrack.ts`.
 
+**Navigasi:** MainScreen selalu ter-mount; Player & Diagnostik tampil sebagai
+overlay (`App.tsx`). Tombol back hardware Android menutup overlay dulu
+(`BackHandler` di App.tsx) — state search/list dipertahankan saat kembali;
+back di MainScreen tetap keluar app (perilaku Android standar).
+
 **Cara demo:** tap lagu iTunes → preview 30 dtk berbunyi; toggle sumber ke
 Audius → cari lagu → tap → lagu utuh berbunyi dengan progress bar yang bisa
 di-seek; pause → play → back (audio berhenti).
@@ -135,24 +140,32 @@ di-seek; pause → play → back (audio berhenti).
 **Cakupan kuliah:** crash aplikasi terlaporkan ke server logging jarak jauh.
 
 **Perilaku di app:** app terintegrasi Sentry (via `expo-sentry`). Setiap crash
-(mis. exception tak tertangani) otomatis terkirim ke Sentry dashboard dengan
-stack trace, device, dan versi app. Untuk keperluan demo ada tombol debug
-"Force crash" (hanya muncul di build dev) yang menimulasi crash nyata.
+(exception tak tertangani) otomatis terkirim ke Sentry dashboard dengan
+stack trace, device, dan versi app. Untuk keperluan demo ada layar
+**Diagnostik** (ikon ⚙ di header — tersedia JUGA di build release, bukan hanya
+dev) berisi tombol "Force crash (JS error)" dan "Render crash (ErrorBoundary)",
+keduanya dengan dialog konfirmasi. Tersedia juga status Sentry dan info app.
 
 **Alur teknis:**
 1. Akun Sentry (free tier) dibuat; DSN dikonfigurasi via env
    `EXPO_PUBLIC_SENTRY_DSN` (tidak hardcode — secret, .env gitignored).
 2. `Sentry.init()` di `App.tsx` saat DSN tersedia; error juga lewat
    `GlobalErrorHandler` (utils/errors.ts) → reporter Sentry.
-3. Tombol debug memanggil `throw new Error("Test crash for demo")`.
-4. Crash terkirim otomatis oleh SDK → muncul di dashboard dalam ±menit.
+3. Tombol "Force crash" melempar error async di luar render tree → hanya
+   tertangkap global handler (crash "nyata").
+4. Tombol "Render crash" me-throw saat render (`renderCrashArmed` state) →
+   tertangkap `GlobalErrorBoundary` → fallback UI "Oops, terjadi kesalahan" +
+   "Coba Lagi" + laporan ke Sentry. Di Expo Go, RedBox dev menutupi fallback;
+   di APK release fallback UI itulah yang terlihat.
+5. Crash terkirim otomatis oleh SDK → muncul di dashboard dalam ±menit.
 
 **Lokasi kode:** `app.json` (plugin @sentry/react-native), `App.tsx`
-(Sentry.init + reporter), tombol di `src/components/ForceCrashButton.tsx`
-(blok `__DEV__`).
+(Sentry.init + reporter), `src/screens/DiagnosticsScreen.tsx`,
+`src/components/GlobalErrorBoundary.tsx`, `src/utils/errors.ts`.
 
-**Cara demo:** tekan "Force crash" (app crash) → buka sentry.io dashboard →
-issue "Test crash for demo" muncul dengan stack trace.
+**Cara demo:** buka Diagnostik (⚙) → "Force crash" → app crash → buka
+sentry.io dashboard → issue muncul dengan stack trace. Atau "Render crash" →
+ErrorBoundary menangkap + fallback UI terlihat (lebih visual untuk demo).
 
 **Bukti:** `docs/screenshots/05-sentry-console.png`.
 
@@ -163,24 +176,26 @@ issue "Test crash for demo" muncul dengan stack trace.
 **Cakupan kuliah:** aplikasi dapat mengirim/mengunggah data keluar (share,
 upload, email).
 
-**Perilaku di app:** user menekan ikon "Share playlist" di toolbar → app
-menyusun daftar lagu hasil pencarian menjadi teks rapi → Android Sharesheet
-terbuka → user memilih Gmail → draft email baru terisi otomatis (subject +
-body daftar lagu) siap dikirim. (Jalur sama bekerja untuk WhatsApp/dll karena
-memakai intent standar Android.)
+**Perilaku di app:** user menekan ikon share (⤴) pada baris lagu di list →
+Android Sharesheet terbuka → user memilih Gmail → draft email baru terisi
+otomatis (subject + body berisi lagu tersebut). Share dilakukan **per-lagu**
+(bukan seluruh hasil pencarian). Jalur sama bekerja untuk WhatsApp/dll karena
+memakai intent standar Android.
 
 **Alur teknis:**
-1. `PlaylistExporter.buildPlaylistText(tracks)`: "Obsidian Playlist\n
-   1. Artist — Title\n2. ..." (fungsi murni → di-unit-test).
-2. `Share.share({ message: text })` dari React Native → Android Sharesheet
-   terbuka (opsi Gmail/WhatsApp/semua app yang handle text).
+1. Tap tombol ⤴ pada `TrackRow` → `shareTrack(track)` di MainScreen →
+   `Share.share({ message })` → Android Sharesheet (format konsisten dengan
+   playlist exporter: "Obsidian\n\n1. Artist — Title").
+2. (Fungsi murni `PlaylistExporter.buildPlaylistText` tetap ada dan
+   di-unit-test — dipakai sebagai format acuan.)
 3. (Alternatif jalur email langsung) `Linking.openURL("mailto:...?subject=...")`.
 
-**Lokasi kode:** `src/utils/playlistExporter.ts`,
-`src/components/SharePlaylistButton.tsx` (dipakai di MainScreen).
+**Lokasi kode:** `src/components/TrackRow.tsx` (tombol ⤴ per baris),
+`src/screens/MainScreen.tsx` (`shareTrack`), `src/utils/playlistExporter.ts`.
 
-**Cara demo:** tekan "Share playlist" → pilih Gmail → draft email terisi daftar
-lagu. (Opsional: kirim ke email sendiri dan tunjukkan emailnya diterima.)
+**Cara demo:** cari lagu → tap ⤴ pada satu lagu → pilih Gmail → draft email
+terisi lagu tersebut. (Opsional: kirim ke email sendiri dan tunjukkan emailnya
+diterima.)
 
 **Bukti:** `docs/screenshots/06-email-draft.png`.
 
@@ -192,10 +207,19 @@ lagu. (Opsional: kirim ke email sendiri dan tunjukkan emailnya diterima.)
 dari cloud).
 
 **Perilaku di app:** app terintegrasi push notification via `expo-notifications`
-(Expo Push Service — di bawah hood Android memakai FCM). Saat pesan push
-dikirim (dari Expo push tool untuk demo; dari server untuk produksi),
-notifikasi muncul di system tray Android walau app sedang ditutup. Menekan
-notifikasi membuka app.
+(Expo Push Service — di bawah hood Android memakai FCM). Dua jalur notifikasi:
+
+1. **Organik (utama untuk demo):** saat lagu selesai diputar (preview 30 dtk
+   habis / lagu utuh selesai), notifikasi lokal muncul di system tray:
+   "Lagu selesai diputar — [judul] — [artis] 🎵". Ini notifikasi dalam alur
+   pengguna nyata, bekerja di Expo Go maupun APK release (tidak terkena batasan
+   FCM remote push yang dihapus dari Expo Go sejak SDK 53).
+2. **Remote (server → device):** push token di-register saat app start
+   (`registerForPushNotificationsAsync`); pesan push dari server (Expo push
+   API) muncul di system tray walau app ditutup. Butuh development build/APK
+   (di Expo Go remote push di-skip — guard ada di kode).
+
+Menekan notifikasi membuka app (response listener terpasang).
 
 **Alur teknis:**
 1. `npx expo install expo-notifications` + plugin di app.json
@@ -204,15 +228,22 @@ notifikasi membuka app.
    (minta permission → dapat Expo push token) + `setNotificationHandler`
    (tampil notifikasi saat app foreground) + response listener (tap → buka
    layar terkait).
-3. Demo: kirim via Expo push tool (https://exp.host/--/api/v2/push/send dengan
-   token) atau curl ke Expo push API.
-4. Untuk build APK produksi, notifikasi jalan tanpa setup Firebase console —
+3. Jalur organik: `PlayerScreen` membaca `didJustFinish` dari player status
+   (expo-audio) → panggil `scheduleTrackFinishedNotification(trackName,
+   artistName)` (guard ref anti dobel-kirim). Notifikasi lokal, delay 1 dtk.
+4. Jalur remote: kirim via Expo push tool (https://exp.host/--/api/v2/push/send
+   dengan token) atau curl ke Expo push API.
+5. Untuk build APK produksi, notifikasi jalan tanpa setup Firebase console —
    Expo yang menangani pengiriman.
 
-**Lokasi kode:** `src/services/notifications.ts`, `app.json` (plugin).
+**Lokasi kode:** `src/services/notifications.ts`,
+`src/screens/PlayerScreen.tsx` (efek didJustFinish), `app.json` (plugin).
 
-**Cara demo:** ambil push token dari log app → kirim test message via Expo push
-tool → notifikasi muncul di device → tap notifikasi → app terbuka.
+**Cara demo:** putar lagu iTunes (preview 30 dtk) → biarkan habis → notifikasi
+"Lagu selesai diputar — [judul] — [artis]" muncul di tray (bisa dibuka dari
+notification drawer). Untuk jalur remote: ambil push token dari log app →
+kirim test message via Expo push tool → notifikasi muncul di device → tap
+notifikasi → app terbuka (perlu development build/APK).
 
 **Bukti:** `docs/screenshots/07-push-notification.png`.
 

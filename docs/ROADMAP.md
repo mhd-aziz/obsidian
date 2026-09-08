@@ -37,6 +37,15 @@ Status progres eksekusi. Agent WAJIB update file ini setiap selesai task
 - ✅ 5.4 Sumber data kedua Audius (full-length): audiusClient + mapper +
   TrackRepository routing + SourceToggle UI + debounce search + stale-guard +
   progress bar & seek di player; TDD 31→55 test hijau (2026-09-08)
+- ✅ 5.5 UX polish: push organik (notifikasi "Lagu selesai diputar" saat
+  preview/lagu habis — menggantikan tombol Test push artifisial), share
+  per-lagu (tombol ⤴ di tiap baris TrackRow, share sheet terverifikasi di
+  device), layar Diagnostik (⚙ di header: info app, status Sentry, Force
+  crash + Render crash dengan konfirmasi — tersedia di build release untuk
+  demo Sentry), state MainScreen dipertahankan via overlay + BackHandler
+  (back hardware menutup overlay, tidak keluar app); verifikasi live di HP
+  (search, share sheet, notifikasi tray, ErrorBoundary fallback); tsc +
+  66 test hijau (2026-09-08)
 - 🔶 5.2 Bukti demo: implementasi 7/7 selesai; screenshot/video di
   docs/screenshots/ menunggu sesi demo di HP fisik (2026-09-08)
 - ⬜ 5.3 Build APK via EAS Build + alur demo dosen

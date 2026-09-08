@@ -91,12 +91,14 @@ obsidian/
     │
     ├── screens/               # ══ LAYER VIEW (MVVM) ══
     │   ├── MainScreen.tsx         # SearchBar + SourceToggle + FlatList + OfflineBanner
-    │   └── PlayerScreen.tsx       # cover besar + play/pause + progress bar + seek
+    │   ├── PlayerScreen.tsx       # cover besar + play/pause + progress bar + seek
+    │   └── DiagnosticsScreen.tsx  # info app + status Sentry + force/render crash
     │
     ├── components/            # komponen reusable lintas layar
-    │   ├── TrackRow.tsx           # item list (cover, judul, artis, badge sumber)
+    │   ├── TrackRow.tsx           # item list (cover, judul, artis, badge sumber, share ⤴)
     │   ├── SourceToggle.tsx       # pemilih sumber iTunes ↔ Audius
     │   ├── OfflineBanner.tsx      # banner konektivitas
+    │   ├── GlobalErrorBoundary.tsx # fallback UI crash (Oops + Coba Lagi)
     │   └── EmptyStateView.tsx     # "no results" / "offline"
     │
     ├── services/              # ── Android/OS service (di luar MVVM klasik)
@@ -118,7 +120,7 @@ obsidian/
 | Repository | `src/repositories/` | `TrackRepository.ts` |
 | ViewModel layar X | `src/viewmodels/XViewModel.ts` | `MainViewModel.ts` |
 | Screen | `src/screens/XScreen.tsx` | `MainScreen.tsx` |
-| Komponen reusable | `src/components/` | `TrackRow.tsx`, `OfflineBanner.tsx` |
+| Komponen reusable | `src/components/` | `TrackRow.tsx`, `GlobalErrorBoundary.tsx` |
 | Service OS (notif) | `src/services/` | `notifications.ts` |
 | Helper murni (testable Jest) | `src/utils/` | `playlistExporter.ts` |
 | Unit test | folder `src/__tests__/` (test Match via jest-expo) | `src/__tests__/Track.test.ts` |
