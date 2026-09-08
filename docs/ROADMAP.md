@@ -46,9 +46,19 @@ Status progres eksekusi. Agent WAJIB update file ini setiap selesai task
   (back hardware menutup overlay, tidak keluar app); verifikasi live di HP
   (search, share sheet, notifikasi tray, ErrorBoundary fallback); tsc +
   66 test hijau (2026-09-08)
-- 🔶 5.2 Bukti demo: implementasi 7/7 selesai; screenshot/video di
-  docs/screenshots/ menunggu sesi demo di HP fisik (2026-09-08)
-- ⬜ 5.3 Build APK via EAS Build + alur demo dosen
+- ✅ 5.2 Bukti demo: implementasi 7/7 selesai; screenshot tersedia di folder
+  `screenshots/` (connectivity banner, iTunes search + preview,
+  Audius full-length); deck presentasi di `persentase/obsidian-presentasi.pptx`
+  (2026-09-08)
+- ✅ 5.3 Build APK via EAS Build: eas.json dibuat (profile production,
+  buildType apk, autoIncrement), EXPO_PUBLIC_* + SENTRY_AUTH_TOKEN di-upload
+  ke EAS env production; build pertama gagal di upload source maps Sentry
+  (sentry-cli tanpa org slug) → fix plugin @sentry/react-native/expo dengan
+  org zisaltech + project obsidian (commit 09dae38); build 1f6fbfde sukses —
+  APK 90MB ter-install di HP, verifikasi live di APK release: search OK,
+  preview audio OK, notifikasi "Lagu selesai diputar" muncul, ErrorBoundary
+  fallback tampil langsung (tanpa RedBox) dan pulih via "Coba Lagi"
+  (2026-09-08)
 
 ## Keputusan terkunci (jangan diubah agent)
 

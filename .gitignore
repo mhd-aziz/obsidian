@@ -30,3 +30,5 @@ yarn-error.*
 
 /screenshots
 /graphify-out
+# Build artifacts & presentations (large binaries)
+persentase/obsidian.apk
