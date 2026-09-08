@@ -19,7 +19,7 @@
 | Arsitektur | **MVVM** (View → ViewModel → Model/Repository) | pola yang dituntut dosen/industri — TETAP, hanya lingkungan yang berubah |
 | UI | React Native components (`View`, `FlatList`, `Pressable`) + StyleSheet | bawaan RN, tanpa dependency UI eksternal |
 | Networking | `fetch` (bawaan) + TypeScript types | iTunes API sederhana GET JSON — fetch cukup (YAGNI axios) |
-| Audio | `expo-audio` (~57.x) | pengganti resmi expo-av yang deprecated; play stream URL |
+| Audio | `expo-audio` (~57.x) | pengganti resmi expo-av yang deprecated; play stream URL (preview iTunes / full-length Audius) |
 | Image loading | `Image` bawaan RN | cover artwork statis — cukup bawaan (YAGNI) |
 | Connectivity | `@react-native-community/netinfo` | standar de-facto RN, dipasang di Sprint 2 |
 | Push | `expo-notifications` | API resmi Expo, di bawah hood FCM |
@@ -59,31 +59,43 @@ obsidian/
 │
 └── src/
     ├── models/                # ══ LAYER MODEL (MVVM) ══
-    │   ├── Track.ts               # type/interface lagu (snake_case dari API)
-    │   └── SearchResponse.ts      # { resultCount, results: Track[] }
+    │   ├── Track.ts               # type/interface lagu + TrackSource (itunes|audius)
+    │   ├── SearchResponse.ts      # { resultCount, results: Track[] } (iTunes)
+    │   └── AudiusTrack.ts         # raw Audius → Track mapper (toTrack)
     │
     ├── api/                   # HTTP murni (tanpa state)
-    │   └── itunesClient.ts        # fetch iTunes Search API (term/entity/limit/offset)
+    │   ├── itunesClient.ts        # fetch iTunes Search API (term/entity/limit/offset)
+    │   └── audiusClient.ts        # fetch Audius API (discovery host, search, stream URL)
     │
     ├── repositories/          # SATU-SATUNYA pemanggil API yang boleh dipakai VM
-    │   └── TrackRepository.ts     # search(term, offset) → Promise<Track[]>
+    │   └── TrackRepository.ts     # search(term, offset, limit, source) → Promise<Track[]>
+    │                              # routing: source='itunes' → itunesClient,
+    │                              #          source='audius' → audiusClient+toTrack
     │
     ├── viewmodels/            # ══ LAYER VIEWMODEL (MVVM) ══
     │   ├── MainViewModel.ts       # useMainViewModel(): tracks, isLoading, isOffline,
-    │   │                          #   search(), loadMore(), error
-    │   └── PlayerViewModel.ts     # usePlayerViewModel(): isPlaying, position, play(), pause()
+    │   │                          #   source, search(), onQueryChange() (debounce),
+    │   │                          #   changeSource(), loadMore(), error
+    │   └── PlayerViewModel.ts     # usePlayerViewModel(): isPlaying, position, duration,
+    │                              #   play(), pause(), seekTo()
     │
     ├── __tests__/              # unit test Jest (kolokasi terpusat)
     │   ├── Track.test.ts           # parsing/normalisasi model
+    │   ├── AudiusTrack.test.ts     # mapper Audius → Track
+    │   ├── audiusClient.test.ts    # client Audius + discovery host cache
+    │   ├── MainViewModelSource.test.ts  # toggle iTunes ↔ Audius + stale guard
+    │   ├── MainViewModelDebounce.test.ts # debounce TextInput
+    │   ├── formatTime.test.ts      # format mm:ss
     │   ├── errors.test.ts          # AppError + GlobalErrorHandler
     │   └── playlistExporter.test.ts
     │
     ├── screens/               # ══ LAYER VIEW (MVVM) ══
-    │   ├── MainScreen.tsx         # SearchBar + FlatList + OfflineBanner
-    │   └── PlayerScreen.tsx       # cover besar + play/pause + progress
+    │   ├── MainScreen.tsx         # SearchBar + SourceToggle + FlatList + OfflineBanner
+    │   └── PlayerScreen.tsx       # cover besar + play/pause + progress bar + seek
     │
     ├── components/            # komponen reusable lintas layar
-    │   ├── TrackRow.tsx           # item list (cover, judul, artis)
+    │   ├── TrackRow.tsx           # item list (cover, judul, artis, badge sumber)
+    │   ├── SourceToggle.tsx       # pemilih sumber iTunes ↔ Audius
     │   ├── OfflineBanner.tsx      # banner konektivitas
     │   └── EmptyStateView.tsx     # "no results" / "offline"
     │
@@ -93,7 +105,8 @@ obsidian/
     └── utils/                 # ── Helper murni (di-unit-test Jest)
         ├── connectivity.ts        # subscribe netinfo → callback/boolean
         ├── playlistExporter.ts    # build teks playlist (fungsi murni)
-        └── constants.ts           # base URL, limit=25, konstanta lain
+        ├── formatTime.ts          # detik → "m:ss" (progress bar)
+        └── constants.ts           # base URL, limit=25, debounce, konstanta Audius
 ```
 
 ### Aturan penempatan file (untuk AI agent)
@@ -124,18 +137,22 @@ TrackRepository.search(term, offset)  ← SATU-SATUNYA pemanggil fetch
         │
         ▼
 itunesClient.ts → GET https://itunes.apple.com/search?...&entity=song&limit=25
-        │
+audiusClient.ts → GET {host}/v1/tracks/search?...&app_name=obsidian   (full-length)
+        │ (TrackRepository routing by source: 'itunes' | 'audius')
         ▼
-SearchResponse → Track[]  (validasi & normalisasi field nullable)
+SearchResponse / data[] → Track[]  (validasi & normalisasi field nullable;
+                                    Audius raw → toTrack() di models/AudiusTrack.ts)
         │
         ▼
 useState di MainViewModel ──props──► FlatList (keyExtractor = trackId)
         │  onEndReached saat scroll → offset+=25 → APPEND
         ▼
 tap item → setScreen(player, track) → usePlayerViewModel
-        → expo-audio player.load(previewUrl) → play()
+        → expo-audio player.replace(previewUrl/streamUrl) → play()
+        → progress bar (position/duration) + seekTo()
 
 Lateral:
+  SourceToggle (View) → changeSource() → reload query aktif dari sumber baru
   connectivity.ts (netinfo) → isOffline state → OfflineBanner tampil/hilang
   playlistExporter.ts → Share.share({message}) → share sheet Android
   notifications.ts → expo-notifications → push notification
@@ -144,8 +161,8 @@ Lateral:
 
 ## 4. Keputusan arsitektur penting (jangan dilanggar agent)
 
-1. SATU sumber data: TrackRepository. Komponen/ViewModel dilarang memanggil
-   fetch iTunes langsung.
+1. SATU pintu data: TrackRepository (routing iTunes/Audius di dalamnya).
+   Komponen/ViewModel dilarang memanggil fetch ke API mana pun langsung.
 2. State UI per layar dalam satu UiState object dari ViewModel hook.
 3. Audio player WAJIB di-release/unload saat unmount — hindari memory leak.
 4. Tidak ada blocking; fetch async/await, state loading eksplisit.

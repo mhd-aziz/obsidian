@@ -113,12 +113,18 @@ audio berhenti dan resource dilepas.
 3. `player.replace(track.previewUrl)` → `player.play()`.
 4. `useEffect` cleanup unmount → `player.release()` (wajib, anti memory-leak).
 5. previewUrl null / gagal load → Alert "Preview tidak tersedia".
+6. Progress bar + seek (`player.seekTo`) — posisi & durasi live dari player
+   events (Task 5.4).
+7. Track Audius: `previewUrl` = stream URL Audius → **lagu utuh** (bukan 30
+   dtk), badge "Audius · Full song" di player & list.
 
 **Lokasi kode:** `src/viewmodels/PlayerViewModel.ts`,
-`src/screens/PlayerScreen.tsx`.
+`src/screens/PlayerScreen.tsx`, `src/api/audiusClient.ts`,
+`src/models/AudiusTrack.ts`.
 
-**Cara demo:** tap lagu apa pun → audio bunyi → pause → play → back (audio
-berhenti).
+**Cara demo:** tap lagu iTunes → preview 30 dtk berbunyi; toggle sumber ke
+Audius → cari lagu → tap → lagu utuh berbunyi dengan progress bar yang bisa
+di-seek; pause → play → back (audio berhenti).
 
 **Bukti:** `docs/screenshots/04-audio-player.mp4` (video, ada suaranya).
 

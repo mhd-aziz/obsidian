@@ -34,6 +34,9 @@ Status progres eksekusi. Agent WAJIB update file ini setiap selesai task
 
 ## Sprint 5 — Polish
 - ✅ 5.1 Dark theme + splash screen + icon (expo-splash-screen) (2026-09-08)
+- ✅ 5.4 Sumber data kedua Audius (full-length): audiusClient + mapper +
+  TrackRepository routing + SourceToggle UI + debounce search + stale-guard +
+  progress bar & seek di player; TDD 31→55 test hijau (2026-09-08)
 - 🔶 5.2 Bukti demo: implementasi 7/7 selesai; screenshot/video di
   docs/screenshots/ menunggu sesi demo di HP fisik (2026-09-08)
 - ⬜ 5.3 Build APK via EAS Build + alur demo dosen
@@ -49,6 +52,7 @@ Status progres eksekusi. Agent WAJIB update file ini setiap selesai task
 | Dev runtime | Expo Go di HP fisik via `npx expo start` (tanpa emulator/SDK lokal) | 2026-09-08 |
 | Build APK | EAS Build (cloud) | 2026-09-08 |
 | API data | iTunes Search API — gratis, tanpa key (fallback Deezer gratis) | 2026-09-07 |
+| Sumber data kedua | **Audius API** (full-length, indie, tanpa key) via toggle UI — jalur A: iTunes tetap sumber utama; PRD out-of-scope full-length direvisi | 2026-09-08 |
 | Push | expo-notifications (Expo Push Service) | 2026-09-08 |
 | Crash | Sentry (expo-sentry), free tier | 2026-09-08 |
 | Target fitur | 7/7 (minimum aman 3) | 2026-09-07 |

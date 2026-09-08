@@ -1,14 +1,22 @@
 /**
- * Track — model data lagu dari iTunes Search API.
+ * Track — model data lagu (iTunes Search API / Audius API).
  * Field mengikuti kontrak API (lihat docs/API.md): snake_case, banyak yang nullable.
+ * source: sumber data track — ditandai saat fetch (TrackRepository), dipakai UI
+ * untuk badge "FULL" (Audius = full-length) dan dedupe lintas sumber.
  */
+export type TrackSource = 'itunes' | 'audius';
+
+/** ID track: number (iTunes trackId) atau string (Audius id). */
+export type TrackId = number | string;
+
 export interface Track {
-  trackId: number;
+  trackId: TrackId;
   trackName: string;
   artistName: string;
   collectionName: string | null;
   previewUrl: string | null;
   artworkUrl100: string | null;
+  source: TrackSource;
 }
 
 /** Artwork upscale 100x100 → 200x200 (replace suffix), null-safe. */

@@ -25,6 +25,7 @@ function makeTrack(id: number): Track {
     collectionName: null,
     previewUrl: null,
     artworkUrl100: null,
+    source: 'itunes',
   };
 }
 
@@ -159,5 +160,51 @@ describe('MainViewModel', () => {
 
     expect(vm.current.uiState.error).toContain('Server');
     expect(vm.current.uiState.tracks).toEqual([]);
+  });
+
+  it('loadMore berhenti setelah halaman terakhir (hasil < PAGE_LIMIT)', async () => {
+    // Halaman 1 penuh (25 item) → halaman 2 kurang dari 25 → halaman 3 TIDAK fetch
+    const page1 = Array.from({ length: 25 }, (_, i) => makeTrack(i + 1));
+    const page2 = [makeTrack(101), makeTrack(102)];
+    (globalThis.fetch as jest.Mock)
+      .mockResolvedValueOnce(jsonResponse({ resultCount: 25, results: page1 }))
+      .mockResolvedValueOnce(jsonResponse({ resultCount: 2, results: page2 }));
+
+    const vm = renderViewModel();
+    await act(async () => {
+      await vm.current.search('indonesia');
+    });
+    await act(async () => {
+      await vm.current.loadMore();
+    });
+    // Scroll lagi — harus di-skip oleh hasMore guard
+    await act(async () => {
+      await vm.current.loadMore();
+    });
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2); // search + loadMore pertama saja
+    expect(vm.current.uiState.tracks).toHaveLength(27);
+  });
+
+  it('query dikosongkan lalu ganti sumber → tidak refetch query lama', async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue(
+      jsonResponse({ resultCount: 1, results: [makeTrack(1)] })
+    );
+    const vm = renderViewModel();
+
+    await act(async () => {
+      await vm.current.search('love');
+    });
+    // Kosongkan input via onQueryChange (bukan search) → ref ikut kosong
+    act(() => {
+      vm.current.onQueryChange('');
+    });
+    await act(async () => {
+      await vm.current.changeSource('audius');
+    });
+
+    // HANYA 1 fetch (search awal): changeSource melihat query kosong → no-op
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(vm.current.uiState.source).toBe('audius');
   });
 });

@@ -14,6 +14,7 @@ const sampleTrack: Track = {
   collectionName: 'Constellations',
   previewUrl: 'https://audio-ssl.itunes.apple.com/preview.m4a',
   artworkUrl100: 'https://is1-ssl.mzstatic.com/100x100bb.jpg',
+  source: 'itunes',
 };
 
 function jsonResponse(body: unknown, status = 200): Response {
@@ -140,5 +141,56 @@ describe('searchTracks (repository)', () => {
 
     const calledUrl = (globalThis.fetch as jest.Mock).mock.calls[0][0] as string;
     expect(calledUrl).toContain('offset=25');
+  });
+});
+
+describe('searchTracks routing sumber data', () => {
+  const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    globalThis.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it('source=audius → request ke Audius, BUKAN iTunes', async () => {
+    (globalThis.fetch as jest.Mock)
+      .mockResolvedValueOnce(jsonResponse({ data: ['https://discovery-audius.test'] }))
+      .mockResolvedValueOnce(
+        jsonResponse({
+          data: [
+            {
+              id: 'AUD1',
+              title: 'Lagu Utuh',
+              duration: 210,
+              genre: 'House',
+              is_streamable: true,
+              is_delete: false,
+              user: { name: 'Anoigma' },
+              artwork: null,
+            },
+          ],
+        })
+      );
+
+    const tracks = await searchTracks('love', 0, 25, 'audius');
+
+    const firstUrl = (globalThis.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(firstUrl).toBe('https://api.audius.co');
+    expect(tracks).toHaveLength(1);
+    expect(tracks[0].source).toBe('audius');
+  });
+
+  it('source default → tetap iTunes', async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue(
+      jsonResponse({ resultCount: 0, results: [] })
+    );
+
+    await searchTracks('love');
+
+    const calledUrl = (globalThis.fetch as jest.Mock).mock.calls[0][0] as string;
+    expect(calledUrl).toContain('https://itunes.apple.com/search?');
   });
 });

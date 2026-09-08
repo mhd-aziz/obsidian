@@ -2,15 +2,16 @@
 
 > Dikembangkan dengan **Expo (React Native + TypeScript)** — dev via Expo Go
 > di HP fisik, arsitektur **MVVM**, API data **gratis tanpa key** (iTunes
-> Search API). Detail teknis di ARCHITECTURE.md.
+> Search API + Audius API). Detail teknis di ARCHITECTURE.md.
 
 ## 1. Ringkasan
 
 Obsidian adalah aplikasi mobile Android untuk menemukan dan mendengarkan
-preview musik. User mencari lagu, melihat katalog (cover, artis, album),
-memutar preview 30 detik, dan membagikan playlist favoritnya. Dibangun dengan
-Expo (React Native + TypeScript) untuk tugas mata kuliah Pemrograman Mobile
-Lanjut (dosen mensyaratkan aplikasi mobile — bahasa/framework bebas).
+musik. User mencari lagu, melihat katalog (cover, artis, album), memutar
+preview 30 detik (iTunes) atau lagu utuh (Audius), dan membagikan playlist
+favoritnya. Dibangun dengan Expo (React Native + TypeScript) untuk tugas mata
+kuliah Pemrograman Mobile Lanjut (dosen mensyaratkan aplikasi mobile —
+bahasa/framework bebas).
 
 ## 2. Target user
 
@@ -31,13 +32,18 @@ Lanjut (dosen mensyaratkan aplikasi mobile — bahasa/framework bebas).
    saya kembali membuka app.
 6. Sebagai user, saya ingin membagikan playlist favorit saya via email/WhatsApp
    agar teman saya bisa melihat rekomendasi saya.
+7. Sebagai user, saya ingin memilih sumber data (iTunes katalog lengkap /
+   Audius lagu utuh) agar saya bisa mendengar lagu penuh, bukan cuma preview.
 
 ## 4. Scope
 
 ### In scope
-- Pencarian lagu via iTunes Search API.
+- Pencarian lagu via iTunes Search API (katalog komersial, preview 30 dtk).
+- Sumber data kedua via Audius API (musik indie, full-length, gratis tanpa
+  key) — toggle sumber di UI (keputusan user 2026-09-08, jalur A).
 - List lagu dengan pagination (infinite scroll).
-- Player preview audio 30 detik (expo-audio).
+- Player audio 30 detik (iTunes) / lagu utuh (Audius) via expo-audio, dengan
+  progress bar + seek.
 - Banner deteksi konektivitas real-time.
 - Notifikasi push via expo-notifications (Expo Push Service).
 - Crash reporting via Sentry (expo-sentry).
@@ -45,7 +51,8 @@ Lanjut (dosen mensyaratkan aplikasi mobile — bahasa/framework bebas).
 - Dark theme "obsidian" (hitam mengkilap).
 
 ### Out of scope (YAGNI — tidak dikerjakan)
-- Full-track streaming / akun premium.
+- Full-track streaming musik KOMERSIAL (butuh langganan/DRM; full-length hanya
+  via katalog Audius).
 - Login / autentikasi user.
 - Backend sendiri (semua data dari API publik + layanan cloud Expo/Sentry).
 - iOS / web version.

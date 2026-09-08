@@ -33,10 +33,17 @@ export function TrackRow({ track, onPress }: TrackRowProps) {
         <Text numberOfLines={1} className="text-base font-semibold text-zinc-100">
           {track.trackName}
         </Text>
-        <Text numberOfLines={1} className="text-sm text-zinc-400">
-          {track.artistName}
-          {track.collectionName ? ` — ${track.collectionName}` : ''}
-        </Text>
+        <View className="flex-row items-center gap-2">
+          <Text numberOfLines={1} className="flex-1 text-sm text-zinc-400">
+            {track.artistName}
+            {track.collectionName ? ` — ${track.collectionName}` : ''}
+          </Text>
+          {track.source === 'audius' ? (
+            <View className="rounded-md bg-emerald-500/15 px-1.5 py-0.5">
+              <Text className="text-[10px] font-bold text-emerald-400">FULL</Text>
+            </View>
+          ) : null}
+        </View>
       </View>
       <Text className="text-lg text-zinc-600">›</Text>
     </Pressable>

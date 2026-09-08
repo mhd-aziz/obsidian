@@ -7,6 +7,7 @@ const baseTrack: Track = {
   collectionName: null,
   previewUrl: null,
   artworkUrl100: null,
+  source: 'itunes',
 };
 
 describe('Track model', () => {

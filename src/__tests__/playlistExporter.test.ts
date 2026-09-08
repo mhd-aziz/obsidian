@@ -8,6 +8,7 @@ const track = (id: number, name: string, artist: string): Track => ({
   collectionName: null,
   previewUrl: null,
   artworkUrl100: null,
+  source: 'itunes',
 });
 
 describe('buildPlaylistText', () => {
