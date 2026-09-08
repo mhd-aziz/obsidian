@@ -1,6 +1,7 @@
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   Text,
   TextInput,
@@ -15,16 +16,32 @@ import { TrackRow } from '../components/TrackRow';
 import { OfflineBanner } from '../components/OfflineBanner';
 import { EmptyStateView } from '../components/EmptyStateView';
 import { SourceToggle } from '../components/SourceToggle';
-import { SharePlaylistButton } from '../components/SharePlaylistButton';
-import { ForceCrashButton } from '../components/ForceCrashButton';
-import { PushTestButton } from '../components/PushTestButton';
+import { Share } from 'react-native';
+
+/**
+ * shareTrack — share SATU lagu (bukan seluruh hasil pencarian) via share sheet
+ * Android (fitur "Uploading and emailing"). Format konsisten dgn playlist.
+ */
+export function shareTrack(track: Track): void {
+  Share.share({
+    message: `Obsidian\n\n1. ${track.artistName} — ${track.trackName}`,
+  }).catch(() => {
+    // user membatalkan share sheet — abaikan (bukan error)
+  });
+}
 
 /**
  * MainScreen — pencarian + daftar lagu (View layer MVVM).
  * Semua state/logic dari useMainViewModel; komponen ini presentational.
  * Task 5.4: toggle sumber iTunes/Audius + search debounce + footer lazy-load.
  */
-export function MainScreen({ onOpenPlayer }: { onOpenPlayer: (track: Track) => void }) {
+export function MainScreen({
+  onOpenPlayer,
+  onOpenDiagnostics,
+}: {
+  onOpenPlayer: (track: Track) => void;
+  onOpenDiagnostics: () => void;
+}) {
   const { uiState, search, onQueryChange, changeSource, loadMore, setOffline } =
     useMainViewModel();
   const insets = useSafeAreaInsets();
@@ -49,13 +66,23 @@ export function MainScreen({ onOpenPlayer }: { onOpenPlayer: (track: Track) => v
       <View className="px-4 pb-3 pt-2">
         <View className="flex-row items-center justify-between pb-3">
           <Text className="text-3xl font-bold text-zinc-50">Obsidian</Text>
-          {uiState.source === 'audius' ? (
-            <View className="rounded-full bg-emerald-500/15 px-2.5 py-1">
-              <Text className="text-[10px] font-bold text-emerald-400">
-                FULL-LENGTH MODE
-              </Text>
-            </View>
-          ) : null}
+          <View className="flex-row items-center gap-2">
+            {uiState.source === 'audius' ? (
+              <View className="rounded-full bg-emerald-500/15 px-2.5 py-1">
+                <Text className="text-[10px] font-bold text-emerald-400">
+                  FULL-LENGTH MODE
+                </Text>
+              </View>
+            ) : null}
+            <Pressable
+              testID="open-diagnostics"
+              onPress={onOpenDiagnostics}
+              hitSlop={8}
+              className="rounded-full bg-zinc-900 px-3 py-1.5 active:opacity-60"
+            >
+              <Text className="text-sm text-zinc-400">⚙</Text>
+            </Pressable>
+          </View>
         </View>
         <View className="flex-row items-center gap-2 rounded-2xl bg-zinc-900 px-4">
           <Text className="text-base text-zinc-500">⌕</Text>
@@ -101,7 +128,9 @@ export function MainScreen({ onOpenPlayer }: { onOpenPlayer: (track: Track) => v
           className="flex-1"
           data={uiState.tracks}
           keyExtractor={(item) => String(item.trackId)}
-          renderItem={({ item }) => <TrackRow track={item} onPress={onOpenPlayer} />}
+          renderItem={({ item }) => (
+            <TrackRow track={item} onPress={onOpenPlayer} onShare={shareTrack} />
+          )}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
           contentContainerStyle={{ paddingBottom: 96 }}
@@ -121,15 +150,11 @@ export function MainScreen({ onOpenPlayer }: { onOpenPlayer: (track: Track) => v
         />
       )}
 
-      {/* Tombol share + tombol debug: docked di bawah, tidak mengganggu list */}
-      <View className="flex-row items-center justify-center gap-3 px-4 pb-3">
-        <SharePlaylistButton tracks={uiState.tracks} />
-        {__DEV__ ? (
-          <View className="flex-row items-center gap-3">
-            <PushTestButton />
-            <ForceCrashButton />
-          </View>
-        ) : null}
+      {/* Share kini per-lagu (tombol ⤴ di tiap baris list) — tidak ada tombol global */}
+      <View className="px-4 pb-3">
+        <Text className="text-center text-[11px] text-zinc-600">
+          Tap ⤴ pada lagu untuk membagikan
+        </Text>
       </View>
     </View>
   );

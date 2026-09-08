@@ -5,12 +5,13 @@
 import './global.css';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { LogBox } from 'react-native';
+import { LogBox, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { APP_ENV } from './src/utils/constants';
 import { GlobalErrorHandler } from './src/utils/errors';
 import { GlobalErrorBoundary } from './src/components/GlobalErrorBoundary';
 import { MainScreen } from './src/screens/MainScreen';
+import { DiagnosticsScreen } from './src/screens/DiagnosticsScreen';
 import { PlayerScreen } from './src/screens/PlayerScreen';
 import { Track } from './src/models/Track';
 import {
@@ -38,6 +39,7 @@ if (sentryDsn) {
 
 export default function App() {
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   // Push notification: register token + listener tap notifikasi (fitur #5).
   useEffect(() => {
@@ -48,11 +50,25 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <GlobalErrorBoundary>
+        {/* MainScreen SELALU ter-mount — state search/list dipertahankan saat
+            buka Player/Diagnostics lalu kembali (tidak ada re-fetch). */}
+        <MainScreen
+          onOpenPlayer={setSelectedTrack}
+          onOpenDiagnostics={() => setShowDiagnostics(true)}
+        />
         {selectedTrack ? (
-          <PlayerScreen track={selectedTrack} onClose={() => setSelectedTrack(null)} />
-        ) : (
-          <MainScreen onOpenPlayer={setSelectedTrack} />
-        )}
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+            <PlayerScreen
+              track={selectedTrack}
+              onClose={() => setSelectedTrack(null)}
+            />
+          </View>
+        ) : null}
+        {showDiagnostics ? (
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+            <DiagnosticsScreen onClose={() => setShowDiagnostics(false)} />
+          </View>
+        ) : null}
         <StatusBar style="light" />
       </GlobalErrorBoundary>
     </SafeAreaProvider>

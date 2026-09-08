@@ -76,16 +76,23 @@ export function addNotificationResponseListener(): () => void {
   return () => subscription.remove();
 }
 
-/** Notifikasi lokal utk verifikasi tampil di device (Task 3.2, dev only). */
-export async function scheduleTestNotification(): Promise<void> {
+/**
+ * Notifikasi lokal saat lagu selesai diputar (fitur push, bentuk organik).
+ * Dipanggil dari PlayerScreen saat player status didJustFinish = true.
+ * Notifikasi lokal bekerja di Expo Go maupun build release.
+ */
+export async function scheduleTrackFinishedNotification(
+  trackName: string,
+  artistName: string
+): Promise<void> {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Obsidian',
-      body: 'Notifikasi push berfungsi 🎵',
+      title: 'Lagu selesai diputar',
+      body: `${trackName} — ${artistName} 🎵`,
       sound: 'default',
     },
     trigger: {
-      seconds: 2,
+      seconds: 1,
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
     },
   });

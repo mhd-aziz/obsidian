@@ -54,7 +54,9 @@ describe('MainScreen connectivity wiring', () => {
 
   it('isOnline=true → setOffline(false); isOnline=false → setOffline(true)', () => {
     act(() => {
-      TestRenderer.create(<MainScreen onOpenPlayer={jest.fn()} />);
+      TestRenderer.create(
+        <MainScreen onOpenPlayer={jest.fn()} onOpenDiagnostics={jest.fn()} />
+      );
     });
 
     // Callback terdaftar via useEffect → ambil dari mock.calls

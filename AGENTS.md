@@ -50,7 +50,7 @@ audio) — plan ini menargetkan 7/7.
 ## Definisi selesai (project-level)
 
 - 7/7 fitur di FEATURE-MAPPING.md punya implementasi + bukti screenshot di
-  `docs/screenshots/`.
+  `/screenshots`.
 - `npx tsc --noEmit`, `npm run test` (Jest), dan `npx expo-doctor` hijau.
 - APK demo ter-build via EAS Build.
 - Semua commit ter-push ke GitHub `mhd-aziz/obsidian`.

@@ -48,6 +48,8 @@ export function usePlayerViewModel(initialTrack: Track | null) {
     isPlaying: status.playing,
     position: status.currentTime,
     duration: status.duration,
+    /** True saat audio barusan selesai diputar (expo-audio didJustFinish). */
+    didJustFinish: status.didJustFinish,
     play,
     pause,
     seekTo,

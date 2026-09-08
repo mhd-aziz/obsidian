@@ -29,3 +29,4 @@ yarn-error.*
 /coverage/
 
 /screenshots
+/graphify-out

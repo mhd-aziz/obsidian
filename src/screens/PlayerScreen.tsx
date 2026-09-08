@@ -1,9 +1,10 @@
 import { Image, Pressable, Text, View, Alert } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePlayerViewModel } from '../viewmodels/PlayerViewModel';
 import { getArtworkUrl200, Track } from '../models/Track';
 import { formatDuration } from '../utils/formatTime';
+import { scheduleTrackFinishedNotification } from '../services/notifications';
 
 /**
  * PlayerScreen — pemutar audio (fitur #4, FEATURE-MAPPING.md).
@@ -27,6 +28,7 @@ export function PlayerScreen({
     seekTo,
     seekBy,
     SEEK_STEP_SECONDS,
+    didJustFinish,
   } = usePlayerViewModel(track);
   const insets = useSafeAreaInsets();
   const [artworkFailed, setArtworkFailed] = useState(false);
@@ -43,6 +45,20 @@ export function PlayerScreen({
       );
     }
   }, [hasPreview]);
+
+  // Push notification saat lagu selesai diputar (fitur push, bentuk organik).
+  // didJustFinish bisa true di beberapa tick status berturut-turut → guard
+  // ref supaya notifikasi tidak dobel kirim untuk satu kali selesai.
+  const notifFiredRef = useRef(false);
+  useEffect(() => {
+    if (didJustFinish && !notifFiredRef.current) {
+      notifFiredRef.current = true;
+      void scheduleTrackFinishedNotification(track.trackName, track.artistName);
+    }
+    if (!didJustFinish) {
+      notifFiredRef.current = false;
+    }
+  }, [didJustFinish, track.trackName, track.artistName]);
 
   // Progress bar: 0..1; durasi belum termuat (0) → 0 (hindari NaN)
   const progress = duration > 0 ? Math.min(position / duration, 1) : 0;
