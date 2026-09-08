@@ -7,10 +7,12 @@ import { subscribeConnectivity } from '../utils/connectivity';
 
 jest.mock('@react-native-community/netinfo', () => ({
   addEventListener: jest.fn(),
+  fetch: jest.fn(),
 }));
 
-const addEventListener = require('@react-native-community/netinfo')
-  .addEventListener as jest.Mock;
+const netinfo = require('@react-native-community/netinfo');
+const addEventListener = netinfo.addEventListener as jest.Mock;
+const fetchState = netinfo.fetch as jest.Mock;
 
 function makeState(overrides: Partial<NetInfoState>): NetInfoState {
   return {
@@ -22,6 +24,12 @@ function makeState(overrides: Partial<NetInfoState>): NetInfoState {
 }
 
 describe('subscribeConnectivity', () => {
+  beforeEach(() => {
+    // Default: fetch() mengembalikan state online agar test lama tidak pecah;
+    // test yang butuh state awal berbeda meng-override mock ini.
+    fetchState.mockResolvedValue(makeState({}));
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -60,14 +68,18 @@ describe('subscribeConnectivity', () => {
     expect(callback).toHaveBeenCalledWith(true);
   });
 
-  it('offline saat isInternetReachable false (wifi tersambung tapi tanpa internet)', () => {
+  it('suspect offline via event listener + probe gagal → callback(false)', async () => {
     const callback = jest.fn();
     addEventListener.mockImplementation((cb: (s: NetInfoState) => void) => {
       cb(makeState({ isConnected: true, isInternetReachable: false }));
       return jest.fn();
     });
+    globalThis.fetch = jest.fn().mockRejectedValue(new TypeError('Network request failed'));
 
     subscribeConnectivity(callback);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
     expect(callback).toHaveBeenCalledWith(false);
   });
 
@@ -80,5 +92,98 @@ describe('subscribeConnectivity', () => {
 
     subscribeConnectivity(callback);
     expect(callback).toHaveBeenCalledWith(false);
+  });
+
+  it('memanggil NetInfo.fetch() untuk state awal (banner tidak nyangkut offline)', async () => {
+    const callback = jest.fn();
+    addEventListener.mockReturnValue(jest.fn());
+    fetchState.mockResolvedValue(makeState({ isInternetReachable: true }));
+
+    subscribeConnectivity(callback);
+    // Biarkan microqueue jalan agar promise fetch resolve
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(fetchState).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith(true);
+  });
+
+  it('state awal suspect offline + probe gagal → callback(false) walau tidak ada event', async () => {
+    const callback = jest.fn();
+    addEventListener.mockReturnValue(jest.fn());
+    fetchState.mockResolvedValue(makeState({ isInternetReachable: false }));
+    globalThis.fetch = jest.fn().mockRejectedValue(new TypeError('Network request failed'));
+
+    subscribeConnectivity(callback);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(callback).toHaveBeenCalledWith(false);
+  });
+
+  describe('suspect offline (connected tapi isInternetReachable false) → probe HTTP', () => {
+    const originalFetch = globalThis.fetch;
+
+    afterEach(() => {
+      globalThis.fetch = originalFetch;
+    });
+
+    async function flushAsync(): Promise<void> {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+
+    it('probe sukses (HTTP respons apa pun) → online', async () => {
+      const callback = jest.fn();
+      addEventListener.mockReturnValue(jest.fn());
+      fetchState.mockResolvedValue(makeState({ isInternetReachable: false }));
+      globalThis.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 });
+
+      subscribeConnectivity(callback);
+      await flushAsync();
+
+      expect(globalThis.fetch).toHaveBeenCalled();
+      expect(callback).toHaveBeenCalledWith(true);
+    });
+
+    it('probe gagal (network error) → offline', async () => {
+      const callback = jest.fn();
+      addEventListener.mockReturnValue(jest.fn());
+      fetchState.mockResolvedValue(makeState({ isInternetReachable: false }));
+      globalThis.fetch = jest.fn().mockRejectedValue(new TypeError('Network request failed'));
+
+      subscribeConnectivity(callback);
+      await flushAsync();
+
+      expect(callback).toHaveBeenCalledWith(false);
+    });
+
+    it('airplane mode → offline TANPA probe (fetch tidak dipanggil)', async () => {
+      const callback = jest.fn();
+      addEventListener.mockReturnValue(jest.fn());
+      fetchState.mockResolvedValue(
+        makeState({ isConnected: false, isInternetReachable: false })
+      );
+      globalThis.fetch = jest.fn();
+
+      subscribeConnectivity(callback);
+      await flushAsync();
+
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+      expect(callback).toHaveBeenCalledWith(false);
+    });
+
+    it('isInternetReachable true → online TANPA probe', async () => {
+      const callback = jest.fn();
+      addEventListener.mockReturnValue(jest.fn());
+      fetchState.mockResolvedValue(makeState({ isInternetReachable: true }));
+      globalThis.fetch = jest.fn();
+
+      subscribeConnectivity(callback);
+      await flushAsync();
+
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+      expect(callback).toHaveBeenCalledWith(true);
+    });
   });
 });

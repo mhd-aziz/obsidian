@@ -29,8 +29,14 @@ export function MainScreen({ onOpenPlayer }: { onOpenPlayer: (track: Track) => v
     useMainViewModel();
   const insets = useSafeAreaInsets();
 
-  // Connectivity banner real-time (fitur #2)
-  useEffect(() => subscribeConnectivity(setOffline), [setOffline]);
+  // Connectivity banner real-time (fitur #2).
+  // subscribeConnectivity mengirim isOnline; state VM menyimpan isOffline —
+  // wajib di-inversi. (Bug lama: diteruskan langsung → banner tampil saat
+  // justru online.)
+  useEffect(
+    () => subscribeConnectivity((online) => setOffline(!online)),
+    [setOffline]
+  );
 
   const hasQuery = uiState.query.trim().length > 0;
 
