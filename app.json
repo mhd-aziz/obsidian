@@ -25,7 +25,13 @@
     },
     "plugins": [
       "expo-notifications",
-      "@sentry/react-native",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "zisaltech",
+          "project": "obsidian"
+        }
+      ],
       [
         "expo-splash-screen",
         {
